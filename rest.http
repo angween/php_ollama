@@ -1,0 +1,39 @@
+### generate
+POST http://localhost:11434/api/generate HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "model": "qwen2",
+  "prompt": "Kenapa laut bewarna biru?",
+  "stream": false,
+  "format": "json",
+}
+
+### chat dengan history
+POST http://localhost:11434/api/chat HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "model": "qwen2",
+  "format": "json",
+  "stream": false,
+  "options": {
+    "temperature": 0.5
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "siapa presiden Indonesia"
+    },
+    {
+      "role": "assistant",
+      "content": "Joko Widodo."
+    },
+    {
+      "role": "user",
+      "content": "tahun berapa dia lahir?"
+    }
+  ]
+}
