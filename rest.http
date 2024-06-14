@@ -20,20 +20,17 @@ Accept: application/json
   "format": "json",
   "stream": false,
   "options": {
-    "temperature": 0.5
+    "temperature": 1
   },
   "messages": [
     {
-      "role": "user",
-      "content": "siapa presiden Indonesia"
-    },
-    {
-      "role": "assistant",
-      "content": "Joko Widodo."
+      "role": "system",
+      "content": "You are Mario from the Super Mario Bros. Answer the user question as Mario."
     },
     {
       "role": "user",
-      "content": "tahun berapa dia lahir?"
+      "content": "How to make my pizza?"
     }
-  ]
+  ],
+  "prompt": "How do I save my princess?"
 }
