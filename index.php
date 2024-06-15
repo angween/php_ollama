@@ -8,6 +8,7 @@
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
 		crossorigin="anonymous">
 	<link href="asset/css/styles.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 
 <body>
@@ -16,20 +17,20 @@
 			<div class="ms-menu">
 				<div class="ms-user clearfix d-flex justify-content-start px-3">
 					<img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="" class="img-avatar pull-left">
+
 					<div>Signed in as <br> m-hollaway@gmail.com</div>
 				</div>
 
-				<div class="p-15">
-					<div class="dropdown">
-						<a class="btn btn-primary btn-block" href="" data-toggle="dropdown">Messages <i
-								class="caret m-l-5"></i></a>
+				<div class="p-3">
+					<form id="frmSearchChat">
+						<div class="input-group">
+							<input type="text" class="form-control" placeholder="Search...">
 
-						<ul class="dropdown-menu dm-icon w-100">
-							<li><a href=""><i class="fa fa-envelope"></i> Messages</a></li>
-							<li><a href=""><i class="fa fa-users"></i> Contacts</a></li>
-							<li><a href=""><i class="fa fa-format-list-bulleted"> </i>Todo Lists</a></li>
-						</ul>
-					</div>
+							<button class="btn btn-outline-secondary" type="submit">
+								<i class="bi bi-search"></i>
+							</button>
+						</div>
+					</form>
 				</div>
 
 				<div class="list-group lg-alt">
@@ -37,9 +38,10 @@
 						<div class="avatar">
 							<img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="" class="img-avatar">
 						</div>
-						<div class="media-body ps-2 d-flex flex-column justify-content-between">
+						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
 							<small class="username">Davil Parnell</small>
-							<small class="text-truncate">Fierent fastidii recteque ad pro fastidii recteque ad pro </small>
+							<small class="text-truncate">Fierent fastidii recteque ad pro fastidii recteque ad pro
+							</small>
 						</div>
 					</a>
 
@@ -47,7 +49,7 @@
 						<div class="avatar">
 							<img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="" class="img-avatar">
 						</div>
-						<div class="media-body ps-2 d-flex flex-column justify-content-between">
+						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
 							<div class="username">Ann Watkinson</div>
 							<small class="text-truncate">Cum sociis natoque penatibus </small>
 						</div>
@@ -57,7 +59,7 @@
 						<div class="avatar">
 							<img src="https://bootdey.com/img/Content/avatar/avatar4.png" alt="" class="img-avatar">
 						</div>
-						<div class="media-body ps-2 d-flex flex-column justify-content-between">
+						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
 							<div class="username">Marse Walter</div>
 							<small class="text-truncate">Suspendisse sapien ligula</small>
 						</div>
@@ -67,7 +69,7 @@
 						<div class="avatar">
 							<img src="https://bootdey.com/img/Content/avatar/avatar5.png" alt="" class="img-avatar">
 						</div>
-						<div class="media-body ps-2 d-flex flex-column justify-content-between">
+						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
 							<div class="username">Jeremy Robbins</div>
 							<small class="text-truncate">Phasellus porttitor tellus nec</small>
 						</div>
@@ -77,7 +79,7 @@
 						<div class="avatar">
 							<img src="https://bootdey.com/img/Content/avatar/avatar6.png" alt="" class="img-avatar">
 						</div>
-						<div class="media-body ps-2 d-flex flex-column justify-content-between">
+						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
 							<div class="username">Reginald Horace</div>
 							<small class="text-truncate">Quisque consequat arcu eget</small>
 						</div>
@@ -87,7 +89,7 @@
 						<div class="avatar">
 							<img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="" class="img-avatar">
 						</div>
-						<div class="media-body ps-2 d-flex flex-column justify-content-between">
+						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
 							<div class="username">Shark Henry</div>
 							<small class="text-truncate">Nam lobortis odio et leo maximu</small>
 						</div>
@@ -97,7 +99,7 @@
 						<div class="avatar">
 							<img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="" class="img-avatar">
 						</div>
-						<div class="media-body ps-2 d-flex flex-column justify-content-between">
+						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
 							<div class="username">Paul Van Dack</div>
 							<small class="text-truncate">Nam posuere purus sed velit auctor
 								sodales</small>
@@ -108,7 +110,7 @@
 						<div class="avatar">
 							<img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="" class="img-avatar">
 						</div>
-						<div class="media-body ps-2 d-flex flex-column justify-content-between">
+						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
 							<div class="username">James Anderson</div>
 							<small class="text-truncate">Vivamus imperdiet sagittis quam</small>
 						</div>
@@ -118,7 +120,7 @@
 						<div class="avatar">
 							<img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="" class="img-avatar">
 						</div>
-						<div class="media-body ps-2 d-flex flex-column justify-content-between">
+						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
 							<div class="username">Kane Williams</div>
 							<small class="text-truncate">Suspendisse justo nulla luctus nec</small>
 						</div>
@@ -129,138 +131,110 @@
 			</div>
 
 			<div class="ms-body">
-				<div class="action-header clearfix">
+				<div class="action-header clearfix d-flex align-items-center px-3">
 					<div class="visible-xs" id="ms-menu-trigger">
-						<i class="fa fa-bars"></i>
+						<i class="bi bi-list"></i>
 					</div>
 
-					<div class="pull-left hidden-xs">
+					<div class="d-flex align-items-center px-3">
 						<img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="" class="img-avatar m-r-10">
-						<div class="lv-avatar pull-left">
+						<div class="lv-avatar px-2">
 
 						</div>
 						<span>David Parbell</span>
 					</div>
 
-					<ul class="ah-actions actions">
+					<ul class="ah-actions actions ms-auto">
 						<li>
 							<a href="">
-								<i class="fa fa-trash"></i>
-							</a>
-						</li>
-						<li>
-							<a href="">
-								<i class="fa fa-check"></i>
+								<i class="bi bi-trash"></i>
 							</a>
 						</li>
 						<li>
 							<a href="">
-								<i class="fa fa-clock-o"></i>
+								<i class="bi bi-arrow-clockwise"></i>
 							</a>
 						</li>
-						<li class="dropdown">
-							<a href="" data-toggle="dropdown" aria-expanded="true">
-								<i class="fa fa-sort"></i>
+						<li>
+							<a href="">
+								<i class="bi bi-share"></i>
 							</a>
-
-							<ul class="dropdown-menu dropdown-menu-right">
-								<li>
-									<a href="">Latest</a>
-								</li>
-								<li>
-									<a href="">Oldest</a>
-								</li>
-							</ul>
-						</li>
-						<li class="dropdown">
-							<a href="" data-toggle="dropdown" aria-expanded="true">
-								<i class="fa fa-bars"></i>
-							</a>
-
-							<ul class="dropdown-menu dropdown-menu-right">
-								<li>
-									<a href="">Refresh</a>
-								</li>
-								<li>
-									<a href="">Message Settings</a>
-								</li>
-							</ul>
 						</li>
 					</ul>
 				</div>
 
-				<div class="message-feed media">
-					<div class="pull-left">
+				<div class="message-feed media d-flex flex-row">
+					<div class="avatar-bot">
 						<img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="" class="img-avatar">
 					</div>
-					<div class="media-body">
+					<div class="media-body px-2">
 						<div class="mf-content">
 							Quisque consequat arcu eget odio cursus, ut tempor arcu vestibulum. Etiam ex arcu, porta a
 							urna non, lacinia pellentesque orci. Proin semper sagittis erat, eget condimentum sapien
 							viverra et. Mauris volutpat magna nibh, et condimentum est rutrum a. Nunc sed turpis mi. In
 							eu massa a sem pulvinar lobortis.
 						</div>
-						<small class="mf-date"><i class="fa fa-clock-o"></i> 20/02/2015 at 09:00</small>
+						<small class="mf-date"><i class="bi bi-clock-history"></i> 20/02/2015 at 09:00</small>
 					</div>
 				</div>
 
-				<div class="message-feed right">
-					<div class="pull-right">
+				<div class="message-feed right d-flex flex-row-reverse">
+					<div class="avatar-user">
 						<img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="" class="img-avatar">
 					</div>
-					<div class="media-body">
+					<div class="media-body px-2">
 						<div class="mf-content">
 							Mauris volutpat magna nibh, et condimentum est rutrum a. Nunc sed turpis mi. In eu massa a
 							sem pulvinar lobortis.
 						</div>
-						<small class="mf-date"><i class="fa fa-clock-o"></i> 20/02/2015 at 09:30</small>
+						<small class="mf-date"><i class="bi bi-clock-history"></i> 20/02/2015 at 09:30</small>
 					</div>
 				</div>
 
-				<div class="message-feed media">
-					<div class="pull-left">
+				<div class="message-feed media d-flex flex-row">
+					<div class="avatar-bot">
 						<img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="" class="img-avatar">
 					</div>
-					<div class="media-body">
+					<div class="media-body px-2">
 						<div class="mf-content">
 							Etiam ex arcumentum
 						</div>
-						<small class="mf-date"><i class="fa fa-clock-o"></i> 20/02/2015 at 09:33</small>
+						<small class="mf-date"><i class="bi bi-clock-history"></i> 20/02/2015 at 09:33</small>
 					</div>
 				</div>
 
-				<div class="message-feed right">
-					<div class="pull-right">
+				<div class="message-feed right d-flex flex-row-reverse">
+					<div class="avatar-user">
 						<img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="" class="img-avatar">
 					</div>
-					<div class="media-body">
+					<div class="media-body px-2">
 						<div class="mf-content">
 							Etiam nec facilisis lacus. Nulla imperdiet augue ullamcorper dui ullamcorper, eu laoreet sem
 							consectetur. Aenean et ligula risus. Praesent sed posuere sem. Cum sociis natoque penatibus
 							et magnis dis parturient montes,
 						</div>
-						<small class="mf-date"><i class="fa fa-clock-o"></i> 20/02/2015 at 10:10</small>
+						<small class="mf-date"><i class="bi bi-clock-history"></i> 20/02/2015 at 10:10</small>
 					</div>
 				</div>
 
-				<div class="message-feed media">
-					<div class="pull-left">
+				<div class="message-feed media d-flex flex-row">
+					<div class="avatar-bot">
 						<img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="" class="img-avatar">
 					</div>
-					<div class="media-body">
+					<div class="media-body px-2">
 						<div class="mf-content">
 							Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Etiam
 							ac tortor ut elit sodales varius. Mauris id ipsum id mauris malesuada tincidunt. Vestibulum
 							elit massa, pulvinar at sapien sed, luctus vestibulum eros. Etiam finibus tristique ante,
 							vitae rhoncus sapien volutpat eget
 						</div>
-						<small class="mf-date"><i class="fa fa-clock-o"></i> 20/02/2015 at 10:24</small>
+						<small class="mf-date"><i class="bi bi-clock-history"></i> 20/02/2015 at 10:24</small>
 					</div>
 				</div>
 
 				<div class="msb-reply">
 					<textarea placeholder="What's on your mind..."></textarea>
-					<button><i class="fa fa-paper-plane-o"></i></button>
+					<button><i class="bi bi-send"></i></button>
 				</div>
 			</div>
 		</div>
