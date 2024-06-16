@@ -1,5 +1,11 @@
 <?php
+require_once("app/config.php");
+
+require_once("app/session.php");
+
 $uniq = '?t=' . uniqid();
+
+$greetingMessage = CHAT_GREETING;
 ?>
 
 <!doctype html>
@@ -30,12 +36,16 @@ $uniq = '?t=' . uniqid();
 	<div class="container-xl chat-wrapper bg-light px-0">
 		<div class="left-panel">
 			<div class="left-nav-bar p-3 bg-light">
+				<!-- Login info -->
+				<!-- // TODO -->
 				<div class="d-flex justify-content-start">
-					<img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="" class="img-avatar pull-left">
+					<img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="" class="img-avatar pull-left">
 
-					<div class="ms-2 d-none d-lg-block">Mr Manager<br> manager@gmail.com</div>
+					<div class="ms-2 d-none d-lg-block">Mr Manager<br> the.manager@gmail.com</div>
 				</div>
 
+				<!-- History search -->
+				<!-- // TODO -->
 				<div class="mt-4">
 					<form id="frmSearchChat">
 						<div class="input-group">
@@ -49,8 +59,8 @@ $uniq = '?t=' . uniqid();
 				</div>
 			</div>
 
-			<div id="user-chats" class="user-list overflow-x-hidden overflow-y-auto bg-light">
-			</div>
+			<!-- Conversation history -->
+			<div id="user-chats" class="user-list overflow-x-hidden overflow-y-auto bg-light"></div>
 		</div>
 		<div class="right-panel">
 			<div class="right-nav-bar d-flex align-items-center bg-light p-3">
@@ -60,7 +70,7 @@ $uniq = '?t=' . uniqid();
 
 				<div class="d-none d-lg-block">
 					<div class="d-flex align-items-center px-3">
-						<img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="" class="img-avatar m-r-10">
+						<img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="" class="img-avatar m-r-10">
 
 						<div class="lv-avatar px-2">
 						</div>
@@ -84,11 +94,14 @@ $uniq = '?t=' . uniqid();
 				</div>
 			</div>
 
-			<div id="conversations" class="chat-window">
-			</div>
+			<!-- Conversation container -->
+			<div id="conversations" class="chat-window"></div>
 
 			<form class="message-input" id="frmPrompt">
 				<input type="hidden" name="path" value="ollama/prompt" />
+
+				<input type="hidden" name="seassonId" value="" />
+
 				<textarea placeholder="Type a message..." rows="2" name="prompt"></textarea>
 
 				<button type="button" id="submit"><i class="bi bi-send"></i></button>
@@ -100,7 +113,8 @@ $uniq = '?t=' . uniqid();
 		import { FormAI } from "./asset/js/formAI.js<?= $uniq ?>"
 
 		new FormAI({
-			container: 'frmPrompt'
+			container: 'frmPrompt',
+			greeting: '<?= $greetingMessage ?>'
 		})
 	</script>
 </body>

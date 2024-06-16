@@ -9,15 +9,22 @@ require_once('session.php');
 
 // Run the request
 $router = new Router();
-$router->getPath()?->execute();
 
+if ( ! $router->getPath()?->execute() ) {
+	$router->controller->response(
+		message: [
+			'status' => 'error',
+			'message' => $router->errorMessage
+		]
+	);
+}
 
 class Router {
 	public function __construct(
 		private ?array $post = null,
 		private ?array $path = null,
-		private ?string $errorMessage = null,
-		private ?Controller $controller = null,
+		public ?string $errorMessage = null,
+		public ?Controller $controller = null,
 	) {
 		$this->post = $this->post ?? $_POST;
 		$this->controller = $this->controller ?? new Controller();

@@ -26,9 +26,9 @@ class Controller
         header("Content-Type: $contentType");
     }
 
-    public function response(string|array $message)
+    public function response(string|array $message, int $statusCode = 202)
     {
-        $this->setHeader(202);
+        $this->setHeader(statusCode: $statusCode);
 
         if (is_array($message)) {
             $this->setContentType('application/json');

@@ -1,6 +1,14 @@
 export class FormAI {
 	constructor(parameter) {
 		if (parameter.container) this.initForm(parameter.container)
+
+			// greeting message
+		setTimeout( () => {
+			this.createMessage({
+				role: 'assistant',
+				content: parameter.greeting
+			})
+		},1000)
 	}
 
 	initForm = (container) => {
@@ -51,6 +59,12 @@ export class FormAI {
 		console.log( data )
 		let template = this.templateUserMessage()
 
+		if (data['status'] && data['status'] == 'error' ) {
+			alert(data['message'])
+
+			return
+		}
+
 		if (data['role'] == 'assistant') {
 			template = this.templateAiMessage()
 		}
@@ -68,7 +82,7 @@ export class FormAI {
 		message = message.replaceAll('\n', '<br/>')
 
 		// for **??**
-		message = message.replace(/\*\*(.*?)\*\*/g, '<h4>$1</h4>');
+		message = message.replace(/\*\*(.*?)\*\*/g, '<h5>$1</h5>');
 
 		// for *??*
 		// message = message.replace(/\*(.*?)\*/g, '<strong>$1</strong>');

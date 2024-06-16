@@ -7,8 +7,13 @@ defined('APP_NAME') or exit('No direct script access allowed');
 
 class Ollama
 {
+	private const LLM = OLLAMA_MODEL ?? 'llama3';
+
 	private const URL_GENERATE = OLLAMA_GENERATE ?? 'http://localhost:11434/api/generate';
+
 	private const URL_CHAT = OLLAMA_CHAT ?? 'http://localhost:11434/api/chat';
+
+	private const SYSTEM_CONTENT = CHAT_SYSTEM ?? "You are an helpfull assistant, answer the user's question with the same language given.";
 
 	public function __construct(
 		private ?Controller $controller = null,
@@ -35,14 +40,14 @@ class Ollama
 
 		// prepare chatData
 		$chatData = $this->prepareChatData(
-			llm: 'llama3',
+			llm: self::LLM,
 			newPrompt: $prompt, 
 			conversationHistory: $conversationHistory,
 			temperature: 1
 		);
 
 		// send chatData to Ollama
-		//$this->getResponOllama(url: self::URL_CHAT, chatData: $chatData);
+		$this->getResponOllama(url: self::URL_CHAT, chatData: $chatData);
 
 		// debug
 		// $this->response = [
@@ -159,7 +164,7 @@ class Ollama
 		if ( empty($conversationHistory) ) {
 			$this->conversationHistory[] = [
 				'role' => 'system',
-				'content' => 'You are Mario from The Super Mario Bros, acting as assistant.'
+				'content' => self::SYSTEM_CONTENT
 			];
 		} 
 
