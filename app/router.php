@@ -7,28 +7,24 @@ require_once('config.php');
 
 require_once('session.php');
 
-defined('APP_NAME') or exit('No direct script access allowed');
-
+// Run the request
 $router = new Router();
+$router->getPath()?->execute();
 
-if ( ! $router->path()?->route()?->response() ) {
-	$router->responseError(message: 'Error!');
-}
 
 class Router {
 	public function __construct(
 		private ?array $post = null,
 		private ?array $path = null,
-		private ?string $controllerName = null,
-		private ?string $controllerMethod = null,
 		private ?string $errorMessage = null,
-		private ?Controller $controller = new Controller(),
+		private ?Controller $controller = null,
 	) {
 		$this->post = $this->post ?? $_POST;
+		$this->controller = $this->controller ?? new Controller();
 	}
 
 
-	public function path()
+	public function getPath()
 	{
 		$path = $this->post['path'] ?? null;
 
@@ -36,28 +32,28 @@ class Router {
 
 		$this->path = explode('/', $path);
 
-		$this->controllerName = ucfirst($this->path[0]);
+		$controllerName = ucfirst($this->path[0]);
+		$controllerMethod = $this->path[1] ?? null;
 
-		$this->controllerMethod = array_shift($this->path[1]) ?? null;
+		$this->controller->controllerName = $controllerName;
+		$this->controller->controllerMethod = $controllerMethod;
 
 		return $this;
-
 	}
 
-	public function route()
+	public function execute()
 	{
 		try {
-			$this->controller(
-				controllerName: $this->controllerName,
-				controllerMethod: $this->controllerMethod,
-			); 
+			$this->controller->run();
+
+			return true;
 		}
 		
 		catch (\Exception $e ) {
 			$this->errorMessage = $e->getMessage();
-		}
 
-		return $this;
+			return null;
+		}
 	}
 
 	public function response()

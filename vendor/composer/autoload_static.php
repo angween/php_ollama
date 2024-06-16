@@ -7,21 +7,32 @@ namespace Composer\Autoload;
 class ComposerStaticInit88d0fcd314ed372d2bb6abe534b9213a
 {
     public static $prefixLengthsPsr4 = array (
-        'a' => 
+        'O' => 
         array (
-            'app\\' => 4,
+            'Ollama\\' => 7,
+        ),
+        'A' => 
+        array (
+            'App\\' => 4,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'app\\' => 
+        'Ollama\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/app/middleware',
+        ),
+        'App\\' => 
         array (
             0 => __DIR__ . '/../..' . '/app',
         ),
     );
 
     public static $classMap = array (
+        'App\\Controller' => __DIR__ . '/../..' . '/app/Controller.php',
+        'App\\Router' => __DIR__ . '/../..' . '/app/Router.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'Ollama\\Ollama' => __DIR__ . '/../..' . '/app/middleware/Ollama.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
