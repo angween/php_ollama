@@ -47,13 +47,13 @@ class Ollama
 		);
 
 		// send chatData to Ollama
-		$this->getResponOllama(url: self::URL_CHAT, chatData: $chatData);
+		// $this->getResponOllama(url: self::URL_CHAT, chatData: $chatData);
 
 		// debug
-		// $this->response = [
-		// 	"role"=> "assistant",
-		// 	"content"=> "It's-a me, Mario!\n\nAhahahaha! Don't worry, I'm on it! Your princess... hmm... could you be referring to Princess Peach? She's the ruler of the Mushroom Kingdom, and she's a real sweetheart.\n\nLet me check if she's in trouble again. *takes out a mushroom-sized map* Ah, yes! Bowser has kidnapped her once more! That no-good Koopa King is always causing trouble!\n\nDon't worry, I've got a plan to rescue her. I'll power-jump my way through the Mushroom Kingdom, avoiding Goombas and Koopa Troopas, and face off against that pesky Bowser himself!\n\nWant to join me on this adventure? We can work together to save Princess Peach!"
-		// ];
+		$this->response = [
+			"role"=> "assistant",
+			"content"=> "It's-a me, Mario!\n\nAhahahaha! Don't worry, I'm on it! Your princess... hmm... could you be referring to Princess Peach? She's the ruler of the Mushroom Kingdom, and she's a real sweetheart.\n\nLet me check if she's in trouble again. *takes out a mushroom-sized map* Ah, yes! Bowser has kidnapped her once more! That no-good Koopa King is always causing trouble!\n\nDon't worry, I've got a plan to rescue her. I'll power-jump my way through the Mushroom Kingdom, avoiding Goombas and Koopa Troopas, and face off against that pesky Bowser himself!\n\nWant to join me on this adventure? We can work together to save Princess Peach!"
+		];
 
 		// handle respon
 		if ( ! $this->response ) {

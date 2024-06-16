@@ -212,4 +212,19 @@ body {
     top: 1px;
 }
 
+.chat-window .scroll-button {
+    position: absolute;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: none;
+    padding: 5px;
+    border-radius: 10px 10px 30px 30px;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
 
+.chat-window .scroll-button:hover {
+    background-color: #454545;
+    color: white;
+}

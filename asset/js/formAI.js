@@ -2,23 +2,29 @@ export class FormAI {
 	constructor(parameter) {
 		if (parameter.container) this.initForm(parameter.container)
 
-			// greeting message
-		setTimeout( () => {
+		// greeting message
+		setTimeout(() => {
 			this.createMessage({
 				role: 'assistant',
 				content: parameter.greeting
 			})
-		},1000)
+		}, 1000)
 	}
 
 	initForm = (container) => {
 		this.conversation = document.getElementById('conversations')
 		
+		this.scrollButton = document.getElementById('scroll-button')
+
 		this.form = document.getElementById(container)
-   
+
 		this.prompt = this.form.querySelector('textarea')
 
 		this.form.querySelector('button').addEventListener('click', this.submitForm)
+
+		this.conversation.addEventListener('scroll', this.toggleScrollButton)
+
+		this.toggleScrollButton()
 	}
 
 	submitForm = () => {
@@ -56,10 +62,10 @@ export class FormAI {
 
 
 	createMessage = (data) => {
-		console.log( data )
+		console.log(data)
 		let template = this.templateUserMessage()
 
-		if (data['status'] && data['status'] == 'error' ) {
+		if (data['status'] && data['status'] == 'error') {
 			alert(data['message'])
 
 			return
@@ -75,6 +81,8 @@ export class FormAI {
 		template = template.replace('##TIME##', this.currentTime())
 
 		this.conversation.innerHTML += template
+
+		this.scrollToBottomChat()
 	}
 
 
@@ -100,13 +108,34 @@ export class FormAI {
 		var year = now.getFullYear()
 		var hours = String(now.getHours()).padStart(2, '0')
 		var minutes = String(now.getMinutes()).padStart(2, '0')
-	
+
 		// Format the date and time
 		var formattedTime = `${day}/${month}/${year} at ${hours}:${minutes}`
-	
+
 		return formattedTime
 	}
 
+
+	toggleScrollButton = () => {
+		if (this.conversation.scrollTop + this.conversation.clientHeight >= this.conversation.scrollHeight - 1) {
+			console.log('1')
+			// this.scrollButton.style.display = 'none !important'
+			this.scrollButton.classList.remove('d-block')
+		} else {
+			console.log('2', this.scrollButton )
+			// this.scrollButton.style.display = 'block !important'
+			this.scrollButton.classList.add('d-block')
+		}
+	}
+
+	scrollToBottomChat = () => {
+		this.conversation.scrollTo({
+			top: this.conversation.scrollHeight,
+			behavior: 'smooth'
+		})
+
+		this.toggleScrollButton()
+	}
 
 	templateUserMessage = () => {
 		return `

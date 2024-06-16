@@ -95,7 +95,9 @@ $greetingMessage = CHAT_GREETING;
 			</div>
 
 			<!-- Conversation container -->
-			<div id="conversations" class="chat-window"></div>
+			<div id="conversations" class="chat-window pb-5">
+				<button id="scroll-button" class="scroll-button"><i class="bi bi-arrow-down"></i></button>
+			</div>
 
 			<form class="message-input" id="frmPrompt">
 				<input type="hidden" name="path" value="ollama/prompt" />
