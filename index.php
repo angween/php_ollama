@@ -9,16 +9,25 @@ $uniq = '?t=' . uniqid();
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Chat With Your Database</title>
+
+	<!-- Vendor Assets -->
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
 		crossorigin="anonymous">
-	<link href="asset/css/style.css<?= $uniq ?>" rel="stylesheet">
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+	<!-- Local Asset -->
+	<link href="asset/css/style.css<?= $uniq ?>" rel="stylesheet">
+
+	<!-- Google Fonts -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@100..900&display=swap" rel="stylesheet">
 </head>
 
 <body>
-	<div class="container-fluid chat-wrapper bg-light px-0">
-		<div class="left-panel bg-light">
-			<div class="left-nav-bar p-3">
+	<div class="container-xl chat-wrapper bg-light px-0">
+		<div class="left-panel">
+			<div class="left-nav-bar p-3 bg-light">
 				<div class="d-flex justify-content-start">
 					<img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="" class="img-avatar pull-left">
 
@@ -38,9 +47,9 @@ $uniq = '?t=' . uniqid();
 				</div>
 			</div>
 
-			<div class="user-list overflow-x-hidden overflow-y-auto">
+			<div class="user-list overflow-x-hidden overflow-y-auto bg-light">
 				<div class="list-group">
-					<a class="list-group-item list-group-item-action d-flex justify-content-start px-3 mb-3" href="">
+					<a class="list-group-item list-group-item-action d-flex justify-content-start p-3" href="">
 						<div class="avatar">
 							<img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="" class="img-avatar">
 						</div>
@@ -52,7 +61,7 @@ $uniq = '?t=' . uniqid();
 						</div>
 					</a>
 
-					<a class="list-group-item list-group-item-action d-flex justify-content-start px-3 mb-3" href="">
+					<a class="list-group-item list-group-item-action d-flex justify-content-start p-3" href="">
 						<div class="avatar">
 							<img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="" class="img-avatar">
 						</div>
@@ -62,7 +71,7 @@ $uniq = '?t=' . uniqid();
 						</div>
 					</a>
 
-					<a class="list-group-item list-group-item-action d-flex justify-content-start px-3 mb-3" href="">
+					<a class="list-group-item list-group-item-action d-flex justify-content-start p-3" href="">
 						<div class="avatar">
 							<img src="https://bootdey.com/img/Content/avatar/avatar4.png" alt="" class="img-avatar">
 						</div>
@@ -72,7 +81,7 @@ $uniq = '?t=' . uniqid();
 						</div>
 					</a>
 
-					<a class="list-group-item list-group-item-action d-flex justify-content-start px-3 mb-3" href="">
+					<a class="list-group-item list-group-item-action d-flex justify-content-start p-3" href="">
 						<div class="avatar">
 							<img src="https://bootdey.com/img/Content/avatar/avatar5.png" alt="" class="img-avatar">
 						</div>
@@ -82,7 +91,7 @@ $uniq = '?t=' . uniqid();
 						</div>
 					</a>
 
-					<a class="list-group-item list-group-item-action d-flex justify-content-start px-3 mb-3" href="">
+					<a class="list-group-item list-group-item-action d-flex justify-content-start p-3" href="">
 						<div class="avatar">
 							<img src="https://bootdey.com/img/Content/avatar/avatar6.png" alt="" class="img-avatar">
 						</div>
@@ -92,7 +101,7 @@ $uniq = '?t=' . uniqid();
 						</div>
 					</a>
 
-					<a class="list-group-item list-group-item-action d-flex justify-content-start px-3 mb-3" href="">
+					<a class="list-group-item list-group-item-action d-flex justify-content-start p-3" href="">
 						<div class="avatar">
 							<img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="" class="img-avatar">
 						</div>
@@ -102,7 +111,7 @@ $uniq = '?t=' . uniqid();
 						</div>
 					</a>
 
-					<a class="list-group-item list-group-item-action d-flex justify-content-start px-3 mb-3 active"
+					<a class="list-group-item list-group-item-action d-flex justify-content-start p-3 active"
 						href="">
 						<div class="avatar">
 							<img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="" class="img-avatar">
@@ -114,7 +123,7 @@ $uniq = '?t=' . uniqid();
 						</div>
 					</a>
 
-					<a class="list-group-item list-group-item-action d-flex justify-content-start px-3 mb-3" href="">
+					<a class="list-group-item list-group-item-action d-flex justify-content-start p-3" href="">
 						<div class="avatar">
 							<img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="" class="img-avatar">
 						</div>
@@ -124,7 +133,7 @@ $uniq = '?t=' . uniqid();
 						</div>
 					</a>
 
-					<a class="list-group-item list-group-item-action d-flex justify-content-start px-3 mb-3" href="">
+					<a class="list-group-item list-group-item-action d-flex justify-content-start p-3" href="">
 						<div class="avatar">
 							<img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="" class="img-avatar">
 						</div>
@@ -154,7 +163,7 @@ $uniq = '?t=' . uniqid();
 
 				<div class="list-group list-group-horizontal ms-auto">
 					<a href="#" class="list-group-item list-group-item-action">
-						<i class="bi bi-trash"></i>
+						<i class="bi bi-trash text-danger"></i>
 					</a>
 					<a href="#" class="list-group-item list-group-item-action">
 						<i class="bi bi-arrow-clockwise"></i>
@@ -247,9 +256,9 @@ $uniq = '?t=' . uniqid();
 			</div>
 
 			<div class="message-input">
-				<input type="text" placeholder="Type a message...">
+				<textarea placeholder="Type a message..." rows="2"></textarea>
 
-				<button>Send</button>
+				<button><i class="bi bi-send"></i></button>
 			</div>
 		</div>
 	</div>
