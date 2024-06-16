@@ -88,6 +88,7 @@ $uniq = '?t=' . uniqid();
 			</div>
 
 			<form class="message-input" id="frmPrompt">
+				<input type="hidden" name="path" value="ollama/prompt" />
 				<textarea placeholder="Type a message..." rows="2" name="prompt"></textarea>
 
 				<button type="button" id="submit"><i class="bi bi-send"></i></button>

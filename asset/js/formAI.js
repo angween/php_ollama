@@ -13,7 +13,7 @@ export class FormAI {
         let formData = new FormData(this.form)
 
         this.ajax({
-            url: 'app/controller.php',
+            url: 'app/router.php',
             method: 'POST',
             data: formData,
             success: function (data) {
