@@ -25,13 +25,15 @@ $uniq = '?t=' . uniqid();
 </head>
 
 <body>
+	<div class="text-center my-3">Most of the feature are not working yet...</div>
+
 	<div class="container-xl chat-wrapper bg-light px-0">
 		<div class="left-panel">
 			<div class="left-nav-bar p-3 bg-light">
 				<div class="d-flex justify-content-start">
 					<img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="" class="img-avatar pull-left">
 
-					<div class="ms-2 d-none d-lg-block">Signed in as <br> m-hollaway@gmail.com</div>
+					<div class="ms-2 d-none d-lg-block">Mr Manager<br> manager@gmail.com</div>
 				</div>
 
 				<div class="mt-4">
@@ -47,102 +49,7 @@ $uniq = '?t=' . uniqid();
 				</div>
 			</div>
 
-			<div class="user-list overflow-x-hidden overflow-y-auto bg-light">
-				<div class="list-group">
-					<a class="list-group-item list-group-item-action d-flex justify-content-start p-3" href="">
-						<div class="avatar">
-							<img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="" class="img-avatar">
-						</div>
-						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
-							<small class="username">Davil Parnell</small>
-							<small class="text-truncate">Fierent fastidii recteque ad pro fastidii recteque ad pro
-								recteque ad pro fastidii recteque ad pro recteque ad pro fastidii recteque ad pro
-							</small>
-						</div>
-					</a>
-
-					<a class="list-group-item list-group-item-action d-flex justify-content-start p-3" href="">
-						<div class="avatar">
-							<img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="" class="img-avatar">
-						</div>
-						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
-							<div class="username">Ann Watkinson</div>
-							<small class="text-truncate">Cum sociis natoque penatibus </small>
-						</div>
-					</a>
-
-					<a class="list-group-item list-group-item-action d-flex justify-content-start p-3" href="">
-						<div class="avatar">
-							<img src="https://bootdey.com/img/Content/avatar/avatar4.png" alt="" class="img-avatar">
-						</div>
-						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
-							<div class="username">Marse Walter</div>
-							<small class="text-truncate">Suspendisse sapien ligula</small>
-						</div>
-					</a>
-
-					<a class="list-group-item list-group-item-action d-flex justify-content-start p-3" href="">
-						<div class="avatar">
-							<img src="https://bootdey.com/img/Content/avatar/avatar5.png" alt="" class="img-avatar">
-						</div>
-						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
-							<div class="username">Jeremy Robbins</div>
-							<small class="text-truncate">Phasellus porttitor tellus nec</small>
-						</div>
-					</a>
-
-					<a class="list-group-item list-group-item-action d-flex justify-content-start p-3" href="">
-						<div class="avatar">
-							<img src="https://bootdey.com/img/Content/avatar/avatar6.png" alt="" class="img-avatar">
-						</div>
-						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
-							<div class="username">Reginald Horace</div>
-							<small class="text-truncate">Quisque consequat arcu eget</small>
-						</div>
-					</a>
-
-					<a class="list-group-item list-group-item-action d-flex justify-content-start p-3" href="">
-						<div class="avatar">
-							<img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="" class="img-avatar">
-						</div>
-						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
-							<div class="username">Shark Henry</div>
-							<small class="text-truncate">Nam lobortis odio et leo maximu</small>
-						</div>
-					</a>
-
-					<a class="list-group-item list-group-item-action d-flex justify-content-start p-3 active"
-						href="">
-						<div class="avatar">
-							<img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="" class="img-avatar">
-						</div>
-						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
-							<div class="username">Paul Van Dack</div>
-							<small class="text-truncate">Nam posuere purus sed velit auctor
-								sodales</small>
-						</div>
-					</a>
-
-					<a class="list-group-item list-group-item-action d-flex justify-content-start p-3" href="">
-						<div class="avatar">
-							<img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="" class="img-avatar">
-						</div>
-						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
-							<div class="username">James Anderson</div>
-							<small class="text-truncate">Vivamus imperdiet sagittis quam</small>
-						</div>
-					</a>
-
-					<a class="list-group-item list-group-item-action d-flex justify-content-start p-3" href="">
-						<div class="avatar">
-							<img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="" class="img-avatar">
-						</div>
-						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
-							<div class="username">Kane Williams</div>
-							<small class="text-truncate">Suspendisse justo nulla luctus nec</small>
-						</div>
-					</a>
-				</div>
+			<div id="user-chats" class="user-list overflow-x-hidden overflow-y-auto bg-light">
 			</div>
 		</div>
 		<div class="right-panel">
@@ -154,10 +61,11 @@ $uniq = '?t=' . uniqid();
 				<div class="d-none d-lg-block">
 					<div class="d-flex align-items-center px-3">
 						<img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="" class="img-avatar m-r-10">
-						<div class="lv-avatar px-2">
 
+						<div class="lv-avatar px-2">
 						</div>
-						<span>David Parbell</span>
+
+						<span>Assistant</span>
 					</div>
 				</div>
 
@@ -165,103 +73,35 @@ $uniq = '?t=' . uniqid();
 					<a href="#" class="list-group-item list-group-item-action">
 						<i class="bi bi-trash text-danger"></i>
 					</a>
+
 					<a href="#" class="list-group-item list-group-item-action">
 						<i class="bi bi-arrow-clockwise"></i>
 					</a>
+
 					<a href="#" class="list-group-item list-group-item-action">
 						<i class="bi bi-share"></i>
 					</a>
 				</div>
-
 			</div>
 
-			<div class="chat-window">
-				<div class="message-feed media d-flex flex-row">
-					<div class="avatar-bot">
-						<img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="" class="img-avatar">
-					</div>
-					<div class="media-body px-2">
-						<div class="mf-content">
-							Quisque consequat arcu eget odio cursus, ut tempor arcu vestibulum. Etiam ex arcu, porta
-							a
-							urna non, lacinia pellentesque orci. Proin semper sagittis erat, eget condimentum sapien
-							viverra et. Mauris volutpat magna nibh, et condimentum est rutrum a. Nunc sed turpis mi.
-							In
-							eu massa a sem pulvinar lobortis.
-						</div>
-						<small class="mf-date"><i class="bi bi-clock-history"></i> 20/02/2015 at 09:00</small>
-					</div>
-				</div>
-
-				<div class="message-feed right d-flex flex-row-reverse">
-					<div class="avatar-user">
-						<img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="" class="img-avatar">
-					</div>
-					<div class="media-body px-2">
-						<div class="mf-content">
-							Mauris volutpat magna nibh, et condimentum est rutrum a. Nunc sed turpis mi. In eu massa
-							a
-							sem pulvinar lobortis.
-						</div>
-						<small class="mf-date"><i class="bi bi-clock-history"></i> 20/02/2015 at 09:30</small>
-					</div>
-				</div>
-
-				<div class="message-feed media d-flex flex-row">
-					<div class="avatar-bot">
-						<img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="" class="img-avatar">
-					</div>
-					<div class="media-body px-2">
-						<div class="mf-content">
-							Etiam ex arcumentum
-						</div>
-						<small class="mf-date"><i class="bi bi-clock-history"></i> 20/02/2015 at 09:33</small>
-					</div>
-				</div>
-
-				<div class="message-feed right d-flex flex-row-reverse">
-					<div class="avatar-user">
-						<img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="" class="img-avatar">
-					</div>
-					<div class="media-body px-2">
-						<div class="mf-content">
-							Etiam nec facilisis lacus. Nulla imperdiet augue ullamcorper dui ullamcorper, eu laoreet
-							sem
-							consectetur. Aenean et ligula risus. Praesent sed posuere sem. Cum sociis natoque
-							penatibus
-							et magnis dis parturient montes,
-						</div>
-						<small class="mf-date"><i class="bi bi-clock-history"></i> 20/02/2015 at 10:10</small>
-					</div>
-				</div>
-
-				<div class="message-feed media d-flex flex-row">
-					<div class="avatar-bot">
-						<img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="" class="img-avatar">
-					</div>
-					<div class="media-body px-2">
-						<div class="mf-content">
-							Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.
-							Etiam
-							ac tortor ut elit sodales varius. Mauris id ipsum id mauris malesuada tincidunt.
-							Vestibulum
-							elit massa, pulvinar at sapien sed, luctus vestibulum eros. Etiam finibus tristique
-							ante,
-							vitae rhoncus sapien volutpat eget
-						</div>
-						<small class="mf-date"><i class="bi bi-clock-history"></i> 20/02/2015 at 10:24</small>
-					</div>
-				</div>
-
+			<div id="conversations" class="chat-window">
 			</div>
 
-			<div class="message-input">
-				<textarea placeholder="Type a message..." rows="2"></textarea>
+			<form class="message-input" id="frmPrompt">
+				<textarea placeholder="Type a message..." rows="2" name="prompt"></textarea>
 
-				<button><i class="bi bi-send"></i></button>
-			</div>
+				<button type="button" id="submit"><i class="bi bi-send"></i></button>
+			</form>
 		</div>
 	</div>
+
+	<script type="module">
+		import { FormAI } from "./asset/js/formAI.js<?= $uniq ?>"
+
+		new FormAI({
+			container: 'frmPrompt'
+		})
+	</script>
 </body>
 
 

@@ -6,7 +6,6 @@
 
 body {
     font-family: "Noto Sans", "Helvetica", Arial, sans-serif;
-    display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
@@ -41,6 +40,10 @@ body {
 
 .left-nav-bar {
     border-right: 1px solid #ddd;
+}
+
+.right-nav-bar {
+    border-bottom: 1px solid #ddd;
 }
 
 .left-nav-bar,
