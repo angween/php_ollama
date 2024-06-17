@@ -8,11 +8,11 @@ class Controller
 	private const PATH = "\\Ollama\\";
 
 	public function __construct(
-		private $controller = null,
+		private ?Router $router = null,
 		public ?string $controllerName = null,
 		public ?string $controllerMethod = null,
 	) {
-		//
+		$this->router = $router ?? new Router();
 	}
 
 
@@ -77,7 +77,7 @@ class Controller
 			throw new \Exception("Application Class '$controllerName' not found!");
 		}
 
-		return new $controllerName(controller: $this);
+		return new $controllerName(controller: $this, router: $this->router);
 	}
 
 	private function validateControllerMethod($controller, string $method)

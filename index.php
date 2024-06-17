@@ -102,7 +102,7 @@ $greetingMessage = CHAT_GREETING;
 			<form class="message-input" id="frmPrompt">
 				<input type="hidden" name="path" value="ollama/prompt" />
 
-				<input type="hidden" name="seassonId" value="" />
+				<input type="hidden" name="seassonId" value="new" />
 
 				<textarea placeholder="Type a message..." rows="2" name="prompt"></textarea>
 

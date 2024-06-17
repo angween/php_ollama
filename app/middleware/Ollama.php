@@ -1,7 +1,10 @@
 <?php
 namespace Ollama;
 
-use App\Controller;
+use App\{
+	Controller,
+	Router
+};
 
 defined('APP_NAME') or exit('No direct script access allowed');
 
@@ -17,23 +20,30 @@ class Ollama
 
 	public function __construct(
 		private ?Controller $controller = null,
+		private ?Router $router = null,
 		private ?array $response = null,
 		private array $conversationHistory = [],
+		private array $post = []
 	) {
 		$this->controller = $controller;
+
+		$this->router = $router;
 	}
 
 
 	public function prompt()
 	{
 		// get the prompt
-		$prompt = $_POST['prompt'] ?? null;
+		$prompt = $this->router->clientPost['prompt'] ?? null;
 		if ( ! $prompt ) throw new \Exception("Missing a Prompt!");
 
 		// sanitize prompt
 		$prompt = $this->sanitizeString(input: $prompt);
 
+
 		// load users conversation history for this session
+		$sessionID = $_POST['sessionID'] ?? null;
+
 		$conversationHistory = [];
 		// TODO
 		// $conversationHistory = $this->loadConversation(user: $currentUser);
