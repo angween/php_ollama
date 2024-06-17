@@ -41,7 +41,7 @@ $greetingMessage = CHAT_GREETING;
 				<div class="d-flex justify-content-start">
 					<img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="" class="img-avatar pull-left">
 
-					<div class="ms-2 d-none d-lg-block">Mr Manager<br> the.manager@gmail.com</div>
+					<div class="ms-2 d-none d-lg-block">User<br> anonymous</div>
 				</div>
 
 				<!-- History search -->
@@ -102,7 +102,7 @@ $greetingMessage = CHAT_GREETING;
 			<form class="message-input" id="frmPrompt">
 				<input type="hidden" name="path" value="ollama/prompt" />
 
-				<input type="hidden" name="seassonId" value="new" />
+				<input type="hidden" name="sessionId" value="new" />
 
 				<textarea placeholder="Type a message..." rows="2" name="prompt"></textarea>
 

@@ -23,7 +23,8 @@ class Ollama
 		private ?Router $router = null,
 		private ?array $response = null,
 		private array $conversationHistory = [],
-		private array $post = []
+		private array $post = [],
+		private string $sessionID = ""
 	) {
 		$this->controller = $controller;
 
@@ -35,23 +36,29 @@ class Ollama
 	{
 		// get the prompt
 		$prompt = $this->router->clientPost['prompt'] ?? null;
-		if ( ! $prompt ) throw new \Exception("Missing a Prompt!");
+		if (!$prompt) throw new \Exception("Missing a Prompt!");
 
 		// sanitize prompt
 		$prompt = $this->sanitizeString(input: $prompt);
 
-
 		// load users conversation history for this session
-		$sessionID = $_POST['sessionID'] ?? null;
+		$sessionID = $this->router->clientPost['sessionId'] ?? null;
 
-		$conversationHistory = [];
-		// TODO
-		// $conversationHistory = $this->loadConversation(user: $currentUser);
+		if ( $sessionID == 'new') {
+			$conversationHistory = [
+				"role" => "system",
+				"content" => self::SYSTEM_CONTENT,
+				"time" => time()
+			];
+		} else {
+			$conversationHistory = $this->loadConversation(filename: $sessionID);
+		}
+
 
 		// prepare chatData
 		$chatData = $this->prepareChatData(
 			llm: self::LLM,
-			newPrompt: $prompt, 
+			newPrompt: $prompt,
 			conversationHistory: $conversationHistory,
 			temperature: 1
 		);
@@ -61,22 +68,87 @@ class Ollama
 
 		// debug
 		$this->response = [
-			"role"=> "assistant",
-			"content"=> "It's-a me, Mario!\n\nAhahahaha! Don't worry, I'm on it! Your princess... hmm... could you be referring to Princess Peach? She's the ruler of the Mushroom Kingdom, and she's a real sweetheart.\n\nLet me check if she's in trouble again. *takes out a mushroom-sized map* Ah, yes! Bowser has kidnapped her once more! That no-good Koopa King is always causing trouble!\n\nDon't worry, I've got a plan to rescue her. I'll power-jump my way through the Mushroom Kingdom, avoiding Goombas and Koopa Troopas, and face off against that pesky Bowser himself!\n\nWant to join me on this adventure? We can work together to save Princess Peach!"
+			"role" => "assistant",
+			"content" => "It's-a me, Mario!\n\nAhahahaha! Don't worry, I'm on it! Your princess... hmm... could you be referring to Princess Peach? She's the ruler of the Mushroom Kingdom, and she's a real sweetheart.\n\nLet me check if she's in trouble again. *takes out a mushroom-sized map* Ah, yes! Bowser has kidnapped her once more! That no-good Koopa King is always causing trouble!\n\nDon't worry, I've got a plan to rescue her. I'll power-jump my way through the Mushroom Kingdom, avoiding Goombas and Koopa Troopas, and face off against that pesky Bowser himself!\n\nWant to join me on this adventure? We can work together to save Princess Peach!"
 		];
 
 		// handle respon
-		if ( ! $this->response ) {
+		if (!$this->response) {
 			throw new \Exception("AI did not Response!");
+		} else {
+			$this->response['time'] = time();
 		}
 
 		// save conversation 
 		// TODO 
-		// $this->saveConversation(newResponse: $response);
+		$this->saveConversation(
+			sessionID: $sessionID,
+			newUserPrompt: $chatData['messages'],
+			newAiResponse: $this->response
+		);
 
+		$this->response['sessionID'] = $this->sessionID;
 
 		// return respon to Front End
 		$this->controller->response(message: $this->response);
+	}
+
+
+	private function loadConversation(string $filename) :?array
+	{
+		$filename = "../session/" . $filename . "txt";
+
+		if (file_exists($filename)) {
+			$jsonArray = file_get_contents($filename);
+
+			$array = json_decode($jsonArray, true);
+
+			return $array;
+		} else {
+			return null;
+		}
+	}
+
+
+	private function saveConversation(
+		string $sessionID,
+		array $newUserPrompt,
+		array $newAiResponse
+	): bool {
+		$newConversation = array_merge($newUserPrompt, [$newAiResponse]);
+
+		// set the $this->sessionID
+		if ( $sessionID == 'new') $sessionID = date('ymd') . '_' . uniqid();
+
+		$filename = "../session/" . $sessionID . "txt";
+
+		$this->sessionID = $sessionID;
+
+
+		// Load existing data
+		if (file_exists($filename)) {
+			$jsonArray = file_get_contents($filename);
+
+			$existingArray = json_decode($jsonArray, true);
+
+			if (!is_array($existingArray)) {
+				$existingArray = [];
+			}
+		} else {
+			$existingArray = [];
+		}
+
+		// Append the new array
+		$existingArray = array_merge($existingArray, $newConversation);
+
+		print_r( $existingArray); exit;
+
+		// Save the updated array back to the file
+		$jsonArray = json_encode($existingArray);
+
+		file_put_contents($filename, $jsonArray);
+
+		return true;
 	}
 
 
@@ -116,11 +188,13 @@ class Ollama
 			}
 
 			if (isset($response['message'])) {
-				if ( is_array( $response['message'] ) ) $this->response = $response['message'];
-				else $this->response = [
-					'role' => 'assistant',
-					'content' => $response['message']
-				];
+				if (is_array($response['message']))
+					$this->response = $response['message'];
+				else
+					$this->response = [
+						'role' => 'assistant',
+						'content' => $response['message']
+					];
 			}
 
 			curl_close($ch);
@@ -130,30 +204,31 @@ class Ollama
 	}
 
 
-	private function sanitizeString(string $input) :string {
+	private function sanitizeString(string $input): string
+	{
 		// Step 1: Remove unwanted HTML tags
 		$input = strip_tags($input);
-	
+
 		// Step 2: Extract email addresses, URLs, and numbers
 		$pattern = '/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})|((http|https):\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/[a-zA-Z0-9._%+-]*)?)|(\b\d+\b)/';
 		preg_match_all($pattern, $input, $matches);
-	
+
 		// $matches[0] contains all matched emails, URLs, and numbers
 		$preservedElements = $matches[0];
-	
+
 		// Step 3: Remove all special characters except spaces, preserved elements, and allowed punctuation
 		$sanitized = preg_replace($pattern, '', $input); // Remove preserved elements
 		$sanitized = preg_replace('/[^a-zA-Z0-9\s!$?]/', '', $sanitized); // Remove special characters except allowed ones
-	
+
 		// Step 4: Insert preserved elements back into the sanitized string
 		foreach ($preservedElements as $element) {
 			$sanitized .= ' ' . $element;
 		}
-	
+
 		// Step 5: Trim and normalize spaces
 		$sanitized = preg_replace('/\s+/', ' ', $sanitized);
 		$sanitized = trim($sanitized);
-	
+
 		return $sanitized;
 	}
 
@@ -161,25 +236,17 @@ class Ollama
 	private function prepareChatData(
 		string $llm,
 		string $newPrompt,
+		?array $conversationHistory,
 		float $temperature = 0.5,
-		array $conversationHistory = []
-	) :array {
+	): array {
 		// create
 		$newConversation = [
 			'role' => 'user',
-			'content' => $newPrompt
+			'content' => $newPrompt,
+			'time' => time()
 		];
 
-		// add old conversation - or start new 
-		if ( empty($conversationHistory) ) {
-			$this->conversationHistory[] = [
-				'role' => 'system',
-				'content' => self::SYSTEM_CONTENT
-			];
-		} 
-
-		// append new prompt
-		$this->conversationHistory[] = $newConversation;
+		$conversationHistory[] = $newConversation;
 
 		return [
 			"model" => $llm,
@@ -187,7 +254,7 @@ class Ollama
 			"options" => [
 				"temperature" => $temperature,
 			],
-			"messages" => $this->conversationHistory
+			"messages" => $conversationHistory
 		];
 	}
 }

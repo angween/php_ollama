@@ -18,6 +18,9 @@ export class FormAI {
 
 		this.form = document.getElementById(container)
 
+		this.sessionName = this.form.querySelector('input[name="sessionId"]')
+		console.log(this.sessionName)
+		
 		this.prompt = this.form.querySelector('textarea')
 
 		this.form.querySelector('button').addEventListener('click', this.submitForm)
@@ -46,6 +49,8 @@ export class FormAI {
 			},
 			success: (data) => {
 				console.log(data)
+				this.setSessionID(data['sessionID'] || 'new')
+
 				this.createMessage(data)
 			},
 			error: (xhr) => {
@@ -58,6 +63,12 @@ export class FormAI {
 
 		// Clear prompt
 		this.prompt.value = ''
+	}
+
+
+	setSessionID = (sessionNewName) => {
+		console.log(this.sessionName, sessionNewName)
+		this.sessionName.value = sessionNewName
 	}
 
 
