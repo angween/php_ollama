@@ -89,14 +89,14 @@ class Ollama
 
 
 		// send chatData to Ollama
-		// $this->getResponOllama(url: self::URL_CHAT, chatData: $chatData);
+		$this->getResponOllama(url: self::URL_CHAT, chatData: $chatData);
 
 
 		// debug Simulation Response -- REMOVE
-		$this->response = [
-			"role" => "assistant",
-			"content" => "It's-a me, Mario! Ahahahaha! Don't worry, I'm on it! That no-good Koopa King is always causing trouble!"
-		];
+		// $this->response = [
+		// 	"role" => "assistant",
+		// 	"content" => "It's-a me, Mario! Ahahahaha! Don't worry, I'm on it! That no-good Koopa King is always causing trouble!"
+		// ];
 
 
 		// handle respon
