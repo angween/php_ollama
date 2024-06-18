@@ -36,7 +36,8 @@ class Ollama
 	{
 		// get the prompt
 		$prompt = $this->router->clientPost['prompt'] ?? null;
-		if (!$prompt) throw new \Exception("Missing a Prompt!");
+		if (!$prompt)
+			throw new \Exception("Missing a Prompt!");
 
 		// sanitize prompt
 		$prompt = $this->sanitizeString(input: $prompt);
@@ -44,47 +45,67 @@ class Ollama
 		// load users conversation history for this session
 		$sessionID = $this->router->clientPost['sessionId'] ?? null;
 
-		if ( $sessionID == 'new') {
+		// new prompt
+		$newPrompt = [
+			'role' => 'user',
+			'content' => $prompt,
+			'created' => time()
+		];
+
+
+		// load or set new conversation
+		if ($sessionID == 'new') {
 			$conversationHistory = [
-				"role" => "system",
-				"content" => self::SYSTEM_CONTENT,
-				"time" => time()
+				[
+					"role" => "system",
+					"content" => self::SYSTEM_CONTENT,
+					"created" => time()
+				]
 			];
 		} else {
-			$conversationHistory = $this->loadConversation(filename: $sessionID);
+			$conversationHistory = $this->loadConversation(filename: $sessionID, newPrompt: $newPrompt);
 		}
+
+		// append new prompt
+		$conversationHistory[] = $newPrompt;
 
 
 		// prepare chatData
 		$chatData = $this->prepareChatData(
 			llm: self::LLM,
-			newPrompt: $prompt,
 			conversationHistory: $conversationHistory,
 			temperature: 1
 		);
 
+
 		// send chatData to Ollama
 		// $this->getResponOllama(url: self::URL_CHAT, chatData: $chatData);
 
-		// debug
+
+		// debug -- REMOVE
 		$this->response = [
 			"role" => "assistant",
-			"content" => "It's-a me, Mario!\n\nAhahahaha! Don't worry, I'm on it! Your princess... hmm... could you be referring to Princess Peach? She's the ruler of the Mushroom Kingdom, and she's a real sweetheart.\n\nLet me check if she's in trouble again. *takes out a mushroom-sized map* Ah, yes! Bowser has kidnapped her once more! That no-good Koopa King is always causing trouble!\n\nDon't worry, I've got a plan to rescue her. I'll power-jump my way through the Mushroom Kingdom, avoiding Goombas and Koopa Troopas, and face off against that pesky Bowser himself!\n\nWant to join me on this adventure? We can work together to save Princess Peach!"
+			"content" => "It's-a me, Mario! Ahahahaha! Don't worry, I'm on it! That no-good Koopa King is always causing trouble!"
 		];
+
 
 		// handle respon
 		if (!$this->response) {
 			throw new \Exception("AI did not Response!");
 		} else {
-			$this->response['time'] = time();
+			$this->response['created'] = time();
 		}
 
+
+		// join conversation arrays
+		// $chatData['messages'][] = $this->response;
+
+
 		// save conversation 
-		// TODO 
 		$this->saveConversation(
 			sessionID: $sessionID,
-			newUserPrompt: $chatData['messages'],
-			newAiResponse: $this->response
+			newPrompt: $newPrompt,
+			newResponse: $this->response
 		);
 
 		$this->response['sessionID'] = $this->sessionID;
@@ -94,61 +115,96 @@ class Ollama
 	}
 
 
-	private function loadConversation(string $filename) :?array
-	{
+	private function loadConversation(
+		string $filename,
+		array $newPrompt,
+	): ?array {
 		$filename = "../session/" . $filename . "txt";
 
 		if (file_exists($filename)) {
-			$jsonArray = file_get_contents($filename);
+			$contentFile = file_get_contents($filename);
 
-			$array = json_decode($jsonArray, true);
+			// add brackets so it can be treat as array
+			$contentFile = "[$contentFile]";
+
+			$array = json_decode($contentFile, true);
 
 			return $array;
 		} else {
-			return null;
+			throw new \Exception("File not found!");
 		}
+	}
+
+
+	private function saveConversationOLD(
+		string $sessionID,
+		array $conversation,
+	): bool {
+		// set the $this->sessionID
+		if ($sessionID == 'new')
+			$sessionID = date('ymd') . '_' . uniqid();
+
+		$filename = "../session/" . $sessionID . "txt";
+
+		$this->sessionID = $sessionID;
+
+		// print_r($conversation); exit;
+
+		// Save the updated array back to the file
+		$jsonArray = json_encode($conversation);
+
+		file_put_contents($filename, $jsonArray);
+
+		return true;
 	}
 
 
 	private function saveConversation(
 		string $sessionID,
-		array $newUserPrompt,
-		array $newAiResponse
+		array $newPrompt,
+		array $newResponse,
 	): bool {
-		$newConversation = array_merge($newUserPrompt, [$newAiResponse]);
+		echo "newpromt:\n";
+		print_r($newPrompt); echo "\n\nnew respon:";
+		print_r($newResponse); echo "\n";exit;
 
 		// set the $this->sessionID
-		if ( $sessionID == 'new') $sessionID = date('ymd') . '_' . uniqid();
+		if ($sessionID == 'new')
+			$sessionID = date('ymd') . '_' . uniqid();
 
 		$filename = "../session/" . $sessionID . "txt";
 
 		$this->sessionID = $sessionID;
 
 
-		// Load existing data
+
+		// merge new conversation
+		$conversation = [$newPrompt, $newResponse];
+
+		print_r($conversation); exit;
+
+		$conversation = json_encode($conversation);
+
+
+		// Load file
 		if (file_exists($filename)) {
-			$jsonArray = file_get_contents($filename);
+			$fileHandle = fopen($filename, 'a');
 
-			$existingArray = json_decode($jsonArray, true);
-
-			if (!is_array($existingArray)) {
-				$existingArray = [];
+			// Add a comma if the file is not empty
+			if (filesize($filename) > 0) {
+				fwrite($fileHandle, ",\n");
 			}
+
+
+			// Write the new array in JSON format to the file
+			fwrite($fileHandle, trim($conversation, "[]\n"));
+
+			fclose($fileHandle);
 		} else {
-			$existingArray = [];
+			// Create a new file and write the new array
+			file_put_contents($filename, trim($conversation, "[]\n"));
 		}
 
-		// Append the new array
-		$existingArray = array_merge($existingArray, $newConversation);
-
-		print_r( $existingArray); exit;
-
-		// Save the updated array back to the file
-		$jsonArray = json_encode($existingArray);
-
-		file_put_contents($filename, $jsonArray);
-
-		return true;
 	}
 
 
@@ -235,18 +291,20 @@ class Ollama
 
 	private function prepareChatData(
 		string $llm,
-		string $newPrompt,
-		?array $conversationHistory,
+		array $conversationHistory,
 		float $temperature = 0.5,
 	): array {
 		// create
-		$newConversation = [
-			'role' => 'user',
-			'content' => $newPrompt,
-			'time' => time()
-		];
+		// $newConversation = [
+		// 	'role' => 'user',
+		// 	'content' => $newPrompt,
+		// 	'created' => time()
+		// ];
 
-		$conversationHistory[] = $newConversation;
+		// if ($sessionID == 'new')
+		// 	$conversationHistory = [$conversationHistory, $newConversation];
+		// else
+		// 	$conversationHistory[] = $newConversation;
 
 		return [
 			"model" => $llm,

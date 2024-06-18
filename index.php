@@ -47,9 +47,9 @@ $greetingMessage = CHAT_GREETING;
 				<!-- History search -->
 				<!-- // TODO -->
 				<div class="mt-4">
-					<form id="frmSearchChat">
+					<form id="frmSearchSession">
 						<div class="input-group">
-							<input type="text" class="form-control" placeholder="Search...">
+							<input type="text" class="form-control" placeholder="Search..." name="search">
 
 							<button class="btn btn-outline-secondary" type="submit">
 								<i class="bi bi-search"></i>
