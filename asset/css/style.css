@@ -78,12 +78,12 @@ body {
 }
 
 #frmSearchSession .input-group button:hover {
-    color: skyblue;
+    color: var(--bs-cyan);
 }
 
 #modelParameters {
     position: absolute;
-    top: -120px;
+    top: -55px;
     transition: all 0.3s ease;
 }
 
@@ -92,7 +92,7 @@ body {
 }
 
 #modelParameters .parameters {
-    height: 200px;
+    height: 135px;
     z-index: 5;
 }
 
@@ -109,10 +109,18 @@ body {
     background: transparent;
 }
 
+#modelParameters .handler button:hover {
+    color: var(--bs-cyan);
+}
+
 .chat-window {
     flex: 1;
     padding: 10px;
     overflow-y: auto;
+}
+
+.chat-window :is(h1, h2, h3, h4, h5, h6) {
+    display: inline;
 }
 
 .message {
@@ -147,13 +155,13 @@ body {
     padding: 10px 20px;
     border: none;
     font-size: 25px;
-    color: #2196f3;
+    color: var(--bs-primary);
     background: 0 0;
 }
 
 .message-input button:hover {
-    background-color: #bdcddf;
-    color: rgb(255, 255, 255) 
+    background-color: var(--bs-primary);
+    color: var(--bs-light);
 }
 
 .img-avatar {

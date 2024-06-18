@@ -19,6 +19,7 @@ define('APP_DESCRIPTION'    , $ini['app'    ]['DESCRIPTION' ]);
 define('OLLAMA_GENERATE'    , $ini['ollama' ]['GENERATE'    ]);
 define('OLLAMA_CHAT'        , $ini['ollama' ]['CHAT'        ]);
 define('OLLAMA_MODEL'       , $ini['ollama' ]['MODEL'       ]);
+define('OLLAMA_MODEL_LIST'  , $ini['ollama' ]['MODEL_LIST'  ]);
 define('OLLAMA_TEMPERATURE' , $ini['ollama' ]['TEMPERATURE' ]);
 define('CHAT_GREETING'      , $ini['ollama' ]['GREETING'    ]);
 define('CHAT_SYSTEM'        , $ini['ollama' ]['SYSTEM'      ]);

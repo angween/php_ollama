@@ -2,6 +2,9 @@ export class FormAI {
 	constructor(parameter) {
 		if (parameter.container) this.initForm(parameter.container)
 
+		// identify all the conversation history
+		this.getAllSessionHistoryID()
+
 		// greeting message
 		setTimeout(() => {
 			this.createMessage({
@@ -14,7 +17,7 @@ export class FormAI {
 
 	initForm = (container) => {
 		this.conversation = document.getElementById('conversations')
-		
+
 		this.scrollButton = document.getElementById('scroll-button')
 
 		this.sessionHistory = document.getElementById('sessionHistory')
@@ -22,7 +25,7 @@ export class FormAI {
 		this.form = document.getElementById(container)
 
 		this.sessionName = this.form.querySelector('input[name="sessionId"]')
-		
+
 		this.prompt = this.form.querySelector('textarea')
 
 		this.form.querySelector('button').addEventListener('click', this.submitForm)
@@ -75,8 +78,8 @@ export class FormAI {
 
 				if (sessionID) {
 					this.setSessionID(sessionID)
-	
-					this.appendSessionHistory(sessionID, true)					
+
+					this.appendSessionHistory(sessionID, true)
 				}
 
 				this.createMessage(data)
@@ -100,6 +103,10 @@ export class FormAI {
 
 
 	appendSessionHistory = (sessionID, isActive) => {
+		// if sessionID is in sessionHistoryID then return
+		if ( this.sessionHistoryID.includes(sessionID['id']) ) return
+
+		// or append in left-side
 		let template = this.templateSessionHistory()
 
 		let created = this.currentTime(sessionID['created'])
@@ -115,6 +122,8 @@ export class FormAI {
 		template = template.replace('##TITLE##', sessionID['title'])
 
 		this.sessionHistory.innerHTML += template
+
+		this.sessionHistoryID.push(sessionID['id'])
 	}
 
 
@@ -146,7 +155,7 @@ export class FormAI {
 		message = message.replaceAll('\n', '<br/>')
 
 		// for **??**
-		message = message.replace(/\*\*(.*?)\*\*/g, '<h5>$1</h5>');
+		message = message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
 		// for *??*
 		// message = message.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
@@ -162,7 +171,7 @@ export class FormAI {
 			const timestamp = parseInt(unixTimestamp, 10);
 
 			// Create a new Date object using the timestamp (multiply by 1000 to convert to milliseconds)
-			date = new Date(timestamp * 1000);			
+			date = new Date(timestamp * 1000);
 		}
 
 		// Extract the day, month, year, hours, and minutes
@@ -185,7 +194,7 @@ export class FormAI {
 			// this.scrollButton.style.display = 'none !important'
 			this.scrollButton.classList.remove('d-block')
 		} else {
-			console.log('2', this.scrollButton )
+			console.log('2', this.scrollButton)
 			// this.scrollButton.style.display = 'block !important'
 			this.scrollButton.classList.add('d-block')
 		}
@@ -292,5 +301,13 @@ export class FormAI {
 			xhr.setRequestHeader('Accept', 'application/json')
 			xhr.send(data ? JSON.stringify(data) : null)
 		}
+	}
+
+
+	getAllSessionHistoryID = () => {
+		const anchors = document.querySelectorAll('#sessionHistory a');
+
+		// Extract the data-id attributes
+		this.sessionHistoryID = Array.from(anchors).map(anchor => anchor.getAttribute('data-id'));
 	}
 }

@@ -100,32 +100,30 @@ $greetingMessage = CHAT_GREETING;
 
 			<!-- Model's Parameters -->
 			<div id="modelParameters" class="d-flex flex-column justify-content-start w-100">
-				<div class="parameters w-100 p-3 bg-light border-bottom">
-					<div class="p-3">
-						<div class="row mb-3">
-							<label for="llm" class="col-md-2 col-form-label">LLM</label>
+				<div class="parameters py-3 px-5 bg-light border-bottom">
+					<div class="row mb-3">
+						<label for="llm" class="col-md-2 col-form-label">LLM</label>
 
-							<div class="col-md-10">
-								<select id="llm" name="llm" form="frmPrompt" class="form-select mb-3">
-									<option value="1" selected>Llama3</option>
+						<div class="col-md-10">
+							<select id="llm" name="llm" form="frmPrompt" class="form-select">
+								<option value="1" selected>Llama3</option>
 
-									<option value="2">Qwen2</option>
-								</select>
-							</div>
+								<option value="2">Qwen2</option>
+							</select>
 						</div>
+					</div>
 
-						<div class="row mb-3">
-							<label for="about" class="col-md-2 col-form-label">Topic</label>
+					<div class="row mb-3">
+						<label for="general" class="col-md-2 col-form-label">Topic</label>
 
-							<div class="col-md-10">
-								<input type="radio" class="btn-check" value="database" name="about" form="frmPrompt" id="database"
-									autocomplete="off" checked>
-								<label class="btn" for="database">Database</label>
+						<div class="col-md-10">
+							<input type="radio" class="btn-check" value="database" name="topic" form="frmPrompt" id="database"
+								autocomplete="off">
+							<label class="btn" for="database">Database</label>
 
-								<input type="radio" class="btn-check" value="general" name="about" form="frmPrompt" id="general"
-									autocomplete="off">
-								<label class="btn" for="general">General Question</label>
-							</div>
+							<input type="radio" class="btn-check" value="general" name="topic" form="frmPrompt" id="general"
+								autocomplete="off" checked>
+							<label class="btn" for="general">General Question</label>
 						</div>
 					</div>
 				</div>

@@ -6,22 +6,32 @@ use App\{
 	Router
 };
 
+use Ollama\OllamaDB;
+
 defined('APP_NAME') or exit('No direct script access allowed');
 
 class Ollama
 {
 	private const LLM = OLLAMA_MODEL ?? 'llama3';
+
+	private const LLM_MODELS = OLLAMA_MODEL_LIST ?? [];
+
 	private const LLM_TEMPERATURE = OLLAMA_TEMPERATURE ?? 0.6;
+
+	private const LLM_TOPIC = ['database', 'general'];
 
 	private const URL_GENERATE = OLLAMA_GENERATE ?? 'http://localhost:11434/api/generate';
 
 	private const URL_CHAT = OLLAMA_CHAT ?? 'http://localhost:11434/api/chat';
 
-	private const SYSTEM_CONTENT = CHAT_SYSTEM ?? "You are an helpfull assistant, answer the user's question with the same language given.";
+	private const SYSTEM_CONTENT_GENERAL = CHAT_SYSTEM ?? "You are an helpfull assistant, answer the user's question with the same language given.";
+
+	private const SYSTEM_CONTENT_DATABASE = "You are an SQL expert and Data Analyst for a company, based on following table schema bellow, answer the question bellow only in the correct SQL Query format, so the system can run that SQL Query to retrieve to answer.";
 
 	public function __construct(
 		private ?Controller $controller = null,
 		private ?Router $router = null,
+		private ?OllamaDB $ollamaDB = null,
 		private ?array $response = null,
 		private array $conversationHistory = [],
 		private array $post = [],
@@ -30,22 +40,21 @@ class Ollama
 		$this->controller = $controller;
 
 		$this->router = $router;
-	}
 
+		$this->ollamaDB = $ollamaDB ?? new OllamaDB;
+	}
 
 	public function prompt()
 	{
-		// get the prompt
-		$prompt = $this->router->clientPost['prompt'] ?? null;
-		if (!$prompt)
-			throw new \Exception("Missing a Prompt!");
+		// get all payload
+		$prompt = $this->getPrompt();
 
-		// sanitize prompt
-		$prompt = $this->sanitizeString(input: $prompt);
+		$llm = $this->getLLM();
+		
+		$topic = $this->getTopic();
 
-		// load users conversation history for this session
+		// get sessionId
 		$sessionID = $this->router->clientPost['sessionId'] ?? null;
-
 
 		// new prompt
 		$newPrompt = [
@@ -54,49 +63,50 @@ class Ollama
 			'created' => time()
 		];
 
+		// variable to collect all the new conversation to save
 		$conversationToSave = [];
 
 
-		// load or set new conversation
-		if ($sessionID == 'new') {
-			$conversationHistory = [
-				[
-					"role" => "system",
-					"content" => self::SYSTEM_CONTENT,
-					"created" => time()
-				]
-			];
-
-			$conversationToSave = $conversationHistory;
-		} else {
-			$conversationHistory = $this->loadConversation(filename: $sessionID, newPrompt: $newPrompt);
-		}
-
-		// append new prompt
-		$conversationHistory[] = $newPrompt;
-
-
-		// array to save later to file session
-		$conversationToSave[] = $newPrompt;
-
-
-		// prepare chatData
-		$chatData = $this->prepareChatData(
-			llm: self::LLM,
-			conversationHistory: $conversationHistory,
-			temperature: self::LLM_TEMPERATURE
-		);
-
-
 		// send chatData to Ollama
-		$this->getResponOllama(url: self::URL_CHAT, chatData: $chatData);
+		if ( $topic == 'general') {
+			// load or set new conversation
+			if ($sessionID == 'new') {
+				$conversationHistory = [
+					[
+						"role" => "system",
+						"content" => self::SYSTEM_CONTENT_GENERAL,
+						"created" => time()
+					]
+				];
 
+				$conversationToSave = $conversationHistory;
+			} else {
+				$conversationHistory = $this->loadConversation(filename: $sessionID, newPrompt: $newPrompt);
+			}
 
-		// debug Simulation Response -- REMOVE
-		// $this->response = [
-		// 	"role" => "assistant",
-		// 	"content" => "It's-a me, Mario! Ahahahaha! Don't worry, I'm on it! That no-good Koopa King is always causing trouble!"
-		// ];
+			// append new prompt
+			$conversationHistory[] = $newPrompt;
+
+			// prepare chatData
+			$chatData = $this->prepareChatData(
+				llm: $llm,
+				conversationHistory: $conversationHistory,
+				temperature: self::LLM_TEMPERATURE
+			);
+
+			// get Ollama respon
+			// $this->response = $this->getResponOllama(url: self::URL_CHAT, chatData: $chatData);
+
+			// debug Simulation Response -- REMOVE
+			$this->response = [
+				"role" => "assistant",
+				"content" => "It's-a me, Mario! Ahahahaha! Don't worry, I'm on it! That no-good Koopa King is always causing trouble!"
+			];
+		}
+		else if ($topic == 'database' ) {
+			
+			$this->response = $this->ollamaDB->promptDB(url: self::URL_CHAT, ollama: $this);
+		}
 
 
 		// handle respon
@@ -106,8 +116,8 @@ class Ollama
 			$this->response['created'] = time();
 		}
 
-
-		// update conversationtoSave
+		// fill up new conversation data
+		$conversationToSave[] = $newPrompt;
 		$conversationToSave[] = $this->response;
 
 
@@ -212,8 +222,6 @@ class Ollama
 
 	private function getResponOllama(string $url, array $chatData)
 	{
-		// echo $url,"\n"; print_r($chatData); exit;
-
 		$ch = curl_init();
 
 		$chatData = json_encode($chatData);
@@ -242,14 +250,14 @@ class Ollama
 			$response = json_decode($response, true);
 
 			if (isset($response['response'])) {
-				$this->response = $response['response'];
+				$LLManswer = $response['response'];
 			}
 
 			if (isset($response['message'])) {
 				if (is_array($response['message']))
-					$this->response = $response['message'];
+					$LLManswer = $response['message'];
 				else
-					$this->response = [
+					$LLManswer = [
 						'role' => 'assistant',
 						'content' => $response['message']
 					];
@@ -257,7 +265,7 @@ class Ollama
 
 			curl_close($ch);
 
-			return true;
+			return $LLManswer;
 		}
 	}
 
@@ -296,18 +304,6 @@ class Ollama
 		array $conversationHistory,
 		float $temperature = 0.5,
 	): array {
-		// create
-		// $newConversation = [
-		// 	'role' => 'user',
-		// 	'content' => $newPrompt,
-		// 	'created' => time()
-		// ];
-
-		// if ($sessionID == 'new')
-		// 	$conversationHistory = [$conversationHistory, $newConversation];
-		// else
-		// 	$conversationHistory[] = $newConversation;
-
 		return [
 			"model" => $llm,
 			"stream" => false,
@@ -316,5 +312,43 @@ class Ollama
 			],
 			"messages" => $conversationHistory
 		];
+	}
+
+
+
+
+	/**
+	 * Supporting methods bellow
+	 */
+
+	private function getPrompt() :string
+	{
+		$prompt = $this->router->clientPost['prompt'] ?? null;
+
+		if (!$prompt)
+			throw new \Exception("Missing a Prompt!");
+
+		// sanitize prompt
+		$prompt = $this->sanitizeString(input: $prompt);
+
+		return $prompt;
+	}
+
+	private function getLLM() :string 
+	{
+		$llm = $this->router->clientPost['llm'] ?? null;
+
+		if ( ! in_array( $llm, self::LLM_MODELS) ) $llm = self::LLM;
+
+		return $llm;
+	}
+
+	private function getTopic() :string 
+	{
+		$topic = $this->router->clientPost['topic'] ?? null;
+
+		if ( ! in_array( $topic, self::LLM_TOPIC) ) $topic = 'general';
+
+		return $topic;
 	}
 }
