@@ -111,17 +111,17 @@ class Ollama
 		$conversationToSave[] = $this->response;
 
 
-		// join conversation arrays
-		// $chatData['messages'][] = $this->response;
-
-
 		// save conversation 
 		$this->saveConversation(
 			sessionID: $sessionID,
 			newPrompt: $conversationToSave,
 		);
 
-		$this->response['sessionID'] = $this->sessionID;
+		$this->response['sessionID'] = [
+			'id' => $this->sessionID,
+			'title' => $prompt,
+			'created' => time()
+		];
 
 		// return respon to Front End
 		$this->controller->response(message: $this->response);
@@ -177,8 +177,7 @@ class Ollama
 		array $newPrompt,
 	): bool {
 		// set the $this->sessionID
-		if ($sessionID == 'new')
-			$sessionID = date('ymd') . '_' . uniqid();
+		if ($sessionID == 'new') $sessionID = date('ymdhi') . '_' . uniqid();
 
 		$filename = "../session/" . $sessionID . ".txt";
 
@@ -187,6 +186,7 @@ class Ollama
 
 		// make it json
 		$conversation = json_encode($newPrompt);
+
 
 		// Load file
 		if (file_exists($filename)) {

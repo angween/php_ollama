@@ -11,15 +11,17 @@ export class FormAI {
 		}, 1000)
 	}
 
+
 	initForm = (container) => {
 		this.conversation = document.getElementById('conversations')
 		
 		this.scrollButton = document.getElementById('scroll-button')
 
+		this.sessionHistory = document.getElementById('sessionHistory')
+
 		this.form = document.getElementById(container)
 
 		this.sessionName = this.form.querySelector('input[name="sessionId"]')
-		console.log(this.sessionName)
 		
 		this.prompt = this.form.querySelector('textarea')
 
@@ -28,7 +30,26 @@ export class FormAI {
 		this.conversation.addEventListener('scroll', this.toggleScrollButton)
 
 		this.toggleScrollButton()
+
+		this.prompt.addEventListener('keypress', function (e) {
+			if (e.key === 'Enter') {
+				// Allow new line if Shift + Enter is pressed
+				if (e.shiftKey) {
+					return
+				}
+
+				e.preventDefault()
+
+				document.getElementById('submit').click() // Trigger the button click
+			}
+		})
+
+		// button parameters
+		document.getElementById('btnShowParameters').addEventListener('click', () => {
+			document.getElementById('modelParameters').classList.toggle('active')
+		})
 	}
+
 
 	submitForm = () => {
 		// create message buble
@@ -49,7 +70,14 @@ export class FormAI {
 			},
 			success: (data) => {
 				console.log(data)
-				this.setSessionID(data['sessionID'] || 'new')
+
+				const sessionID = data['sessionID'] || null
+
+				if (sessionID) {
+					this.setSessionID(sessionID)
+	
+					this.appendSessionHistory(sessionID, true)					
+				}
 
 				this.createMessage(data)
 			},
@@ -66,14 +94,31 @@ export class FormAI {
 	}
 
 
-	setSessionID = (sessionNewName) => {
-		console.log(this.sessionName, sessionNewName)
-		this.sessionName.value = sessionNewName
+	setSessionID = (sessionID) => {
+		this.sessionName.value = sessionID['id']
+	}
+
+
+	appendSessionHistory = (sessionID, isActive) => {
+		let template = this.templateSessionHistory()
+
+		let created = this.currentTime(sessionID['created'])
+
+		if (isActive) {
+			template = template.replace('##ACTIVE##', 'active')
+		} else {
+			template = template.replace('##ACTIVE##', '')
+		}
+
+		template = template.replace('##ID##', sessionID['id'])
+		template = template.replace('##TIME##', created)
+		template = template.replace('##TITLE##', sessionID['title'])
+
+		this.sessionHistory.innerHTML += template
 	}
 
 
 	createMessage = (data) => {
-		console.log(data)
 		let template = this.templateUserMessage()
 
 		if (data['status'] && data['status'] == 'error') {
@@ -110,15 +155,22 @@ export class FormAI {
 	}
 
 
-	currentTime = () => {
-		var now = new Date()
+	currentTime = (unixTimestamp) => {
+		var date = new Date()
+
+		if (unixTimestamp) {
+			const timestamp = parseInt(unixTimestamp, 10);
+
+			// Create a new Date object using the timestamp (multiply by 1000 to convert to milliseconds)
+			date = new Date(timestamp * 1000);			
+		}
 
 		// Extract the day, month, year, hours, and minutes
-		var day = String(now.getDate()).padStart(2, '0')
-		var month = String(now.getMonth() + 1).padStart(2, '0') // Months are 0-indexed
-		var year = now.getFullYear()
-		var hours = String(now.getHours()).padStart(2, '0')
-		var minutes = String(now.getMinutes()).padStart(2, '0')
+		var day = String(date.getDate()).padStart(2, '0')
+		var month = String(date.getMonth() + 1).padStart(2, '0') // Months are 0-indexed
+		var year = date.getFullYear()
+		var hours = String(date.getHours()).padStart(2, '0')
+		var minutes = String(date.getMinutes()).padStart(2, '0')
 
 		// Format the date and time
 		var formattedTime = `${day}/${month}/${year} at ${hours}:${minutes}`
@@ -178,6 +230,21 @@ export class FormAI {
 		<small class="mf-date"><i class="bi bi-clock-history"></i> ##TIME##</small>
 	</div>
 </div>
+`
+	}
+
+
+	templateSessionHistory = () => {
+		return `
+<a class="list-group-item list-group-item-action d-flex justify-content-start p-3 ##ACTIVE##" href="" data-id="##ID##">
+	<div class="avatar">
+		<img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="" class="img-avatar">
+	</div>
+	<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
+		<small class="username">##TIME##</small>
+		<small class="text-truncate">##TITLE##</small>
+	</div>
+</a>
 `
 	}
 

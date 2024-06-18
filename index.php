@@ -1,7 +1,7 @@
 <?php
-require_once("app/config.php");
+require_once ("app/config.php");
 
-require_once("app/session.php");
+require_once ("app/session.php");
 
 $uniq = '?t=' . uniqid();
 
@@ -33,7 +33,7 @@ $greetingMessage = CHAT_GREETING;
 <body>
 	<div class="text-center my-3">Most of the feature are not working yet...</div>
 
-	<div class="container-xl chat-wrapper bg-light px-0">
+	<div class="container-lg chat-wrapper bg-light px-0">
 		<div class="left-panel">
 			<div class="left-nav-bar p-3 bg-light">
 				<!-- Login info -->
@@ -51,7 +51,8 @@ $greetingMessage = CHAT_GREETING;
 						<div class="input-group">
 							<input type="text" class="form-control" placeholder="Search..." name="search">
 
-							<button class="btn btn-outline-secondary" type="submit">
+							<button class="btn btn-outline-secondary" type="submit"
+								style="--bs-btn-border-color: var(--bs-border-color);">
 								<i class="bi bi-search"></i>
 							</button>
 						</div>
@@ -60,9 +61,12 @@ $greetingMessage = CHAT_GREETING;
 			</div>
 
 			<!-- Conversation history -->
-			<div id="user-chats" class="user-list overflow-x-hidden overflow-y-auto bg-light"></div>
+			<div class="user-list overflow-x-hidden overflow-y-auto bg-light flex-fill flex-grow-1">
+				<div id="sessionHistory" class="list-group"></div>
+			</div>
 		</div>
-		<div class="right-panel">
+
+		<div class="right-panel overflow-hidden">
 			<div class="right-nav-bar d-flex align-items-center bg-light p-3">
 				<div class="d-lg-none d-md-block" id="ms-menu-trigger">
 					<button type="button" class="btn btn-outline-secondary"><i class="bi bi-list"></i></button>
@@ -94,12 +98,50 @@ $greetingMessage = CHAT_GREETING;
 				</div>
 			</div>
 
+			<!-- Model's Parameters -->
+			<div id="modelParameters" class="d-flex flex-column justify-content-start w-100">
+				<div class="parameters w-100 p-3 bg-light border-bottom">
+					<div class="p-3">
+						<div class="row mb-3">
+							<label for="llm" class="col-md-2 col-form-label">LLM</label>
+
+							<div class="col-md-10">
+								<select id="llm" name="llm" form="frmPrompt" class="form-select mb-3">
+									<option value="1" selected>Llama3</option>
+
+									<option value="2">Qwen2</option>
+								</select>
+							</div>
+						</div>
+
+						<div class="row mb-3">
+							<label for="about" class="col-md-2 col-form-label">Topic</label>
+
+							<div class="col-md-10">
+								<input type="radio" class="btn-check" name="about" form="frmPrompt" id="database"
+									autocomplete="off" checked>
+								<label class="btn" for="database">Database</label>
+
+								<input type="radio" class="btn-check" name="about" form="frmPrompt" id="general"
+									autocomplete="off">
+								<label class="btn" for="general">General Question</label>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div
+					class="handler rounded-5 rounded-top-0 ms-auto text-center pb-1 bg-light text-muted border border-top-0 position-relative">
+					<button type="button" id="btnShowParameters"><i class="bi bi-caret-down"></i></button>
+				</div>
+			</div>
+
 			<!-- Conversation container -->
 			<div id="conversations" class="chat-window pb-5">
 				<button id="scroll-button" class="scroll-button"><i class="bi bi-arrow-down"></i></button>
 			</div>
 
-			<form class="message-input" id="frmPrompt">
+			<form class="message-input border-top" id="frmPrompt">
 				<input type="hidden" name="path" value="ollama/prompt" />
 
 				<input type="hidden" name="sessionId" value="new" />

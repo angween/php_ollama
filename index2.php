@@ -37,7 +37,7 @@ $uniq = '?t=' . uniqid();
 				</div>
 
 				<div class="mt-4">
-					<form id="frmSearchChat">
+					<form id="frmSearchSession">
 						<div class="input-group">
 							<input type="text" class="form-control" placeholder="Search...">
 
@@ -49,7 +49,7 @@ $uniq = '?t=' . uniqid();
 				</div>
 			</div>
 
-			<div class="user-list overflow-x-hidden overflow-y-auto bg-light">
+			<div class="user-list overflow-x-hidden overflow-y-auto bg-light flex-fill flex-grow-1">
 				<div class="list-group">
 					<a class="list-group-item list-group-item-action d-flex justify-content-start p-3" href="">
 						<div class="avatar">
@@ -60,46 +60,6 @@ $uniq = '?t=' . uniqid();
 							<small class="text-truncate">Fierent fastidii recteque ad pro fastidii recteque ad pro
 								recteque ad pro fastidii recteque ad pro recteque ad pro fastidii recteque ad pro
 							</small>
-						</div>
-					</a>
-
-					<a class="list-group-item list-group-item-action d-flex justify-content-start p-3" href="">
-						<div class="avatar">
-							<img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="" class="img-avatar">
-						</div>
-						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
-							<div class="username">Ann Watkinson</div>
-							<small class="text-truncate">Cum sociis natoque penatibus </small>
-						</div>
-					</a>
-
-					<a class="list-group-item list-group-item-action d-flex justify-content-start p-3" href="">
-						<div class="avatar">
-							<img src="https://bootdey.com/img/Content/avatar/avatar4.png" alt="" class="img-avatar">
-						</div>
-						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
-							<div class="username">Marse Walter</div>
-							<small class="text-truncate">Suspendisse sapien ligula</small>
-						</div>
-					</a>
-
-					<a class="list-group-item list-group-item-action d-flex justify-content-start p-3" href="">
-						<div class="avatar">
-							<img src="https://bootdey.com/img/Content/avatar/avatar5.png" alt="" class="img-avatar">
-						</div>
-						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
-							<div class="username">Jeremy Robbins</div>
-							<small class="text-truncate">Phasellus porttitor tellus nec</small>
-						</div>
-					</a>
-
-					<a class="list-group-item list-group-item-action d-flex justify-content-start p-3" href="">
-						<div class="avatar">
-							<img src="https://bootdey.com/img/Content/avatar/avatar6.png" alt="" class="img-avatar">
-						</div>
-						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
-							<div class="username">Reginald Horace</div>
-							<small class="text-truncate">Quisque consequat arcu eget</small>
 						</div>
 					</a>
 
