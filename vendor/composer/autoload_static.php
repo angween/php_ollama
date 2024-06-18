@@ -29,10 +29,7 @@ class ComposerStaticInit88d0fcd314ed372d2bb6abe534b9213a
     );
 
     public static $classMap = array (
-        'App\\Controller' => __DIR__ . '/../..' . '/app/Controller.php',
-        'App\\Router' => __DIR__ . '/../..' . '/app/Router.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
-        'Ollama\\Ollama' => __DIR__ . '/../..' . '/app/middleware/Ollama.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

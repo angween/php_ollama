@@ -45,12 +45,15 @@ class Ollama
 		// load users conversation history for this session
 		$sessionID = $this->router->clientPost['sessionId'] ?? null;
 
+
 		// new prompt
 		$newPrompt = [
 			'role' => 'user',
 			'content' => $prompt,
 			'created' => time()
 		];
+
+		$conversationToSave = [];
 
 
 		// load or set new conversation
@@ -62,12 +65,18 @@ class Ollama
 					"created" => time()
 				]
 			];
+
+			$conversationToSave = $conversationHistory;
 		} else {
 			$conversationHistory = $this->loadConversation(filename: $sessionID, newPrompt: $newPrompt);
 		}
 
 		// append new prompt
 		$conversationHistory[] = $newPrompt;
+
+
+		// array to save later to file session
+		$conversationToSave[] = $newPrompt; 
 
 
 		// prepare chatData
@@ -82,7 +91,7 @@ class Ollama
 		// $this->getResponOllama(url: self::URL_CHAT, chatData: $chatData);
 
 
-		// debug -- REMOVE
+		// debug Simulation Response -- REMOVE
 		$this->response = [
 			"role" => "assistant",
 			"content" => "It's-a me, Mario! Ahahahaha! Don't worry, I'm on it! That no-good Koopa King is always causing trouble!"
@@ -97,6 +106,10 @@ class Ollama
 		}
 
 
+		// update conversationtoSave
+		$conversationToSave[] = $this->response;
+
+
 		// join conversation arrays
 		// $chatData['messages'][] = $this->response;
 
@@ -104,7 +117,7 @@ class Ollama
 		// save conversation 
 		$this->saveConversation(
 			sessionID: $sessionID,
-			newPrompt: $newPrompt,
+			newPrompt: $conversationToSave,
 			newResponse: $this->response
 		);
 
@@ -119,7 +132,7 @@ class Ollama
 		string $filename,
 		array $newPrompt,
 	): ?array {
-		$filename = "../session/" . $filename . "txt";
+		$filename = "../session/" . $filename . ".txt";
 
 		if (file_exists($filename)) {
 			$contentFile = file_get_contents($filename);
@@ -164,27 +177,16 @@ class Ollama
 		array $newPrompt,
 		array $newResponse,
 	): bool {
-		echo "newpromt:\n";
-		print_r($newPrompt); echo "\n\nnew respon:";
-		print_r($newResponse); echo "\n";exit;
-
 		// set the $this->sessionID
 		if ($sessionID == 'new')
 			$sessionID = date('ymd') . '_' . uniqid();
 
-		$filename = "../session/" . $sessionID . "txt";
+		$filename = "../session/" . $sessionID . ".txt";
 
 		$this->sessionID = $sessionID;
 
-
-
-		// merge new conversation
-		$conversation = [$newPrompt, $newResponse];
-
-		print_r($conversation); exit;
-
-		$conversation = json_encode($conversation);
-
+		// make it json
+		$conversation = json_encode($newPrompt);
 
 		// Load file
 		if (file_exists($filename)) {
@@ -195,7 +197,6 @@ class Ollama
 				fwrite($fileHandle, ",\n");
 			}
 
-
 			// Write the new array in JSON format to the file
 			fwrite($fileHandle, trim($conversation, "[]\n"));
 
@@ -205,6 +206,7 @@ class Ollama
 			file_put_contents($filename, trim($conversation, "[]\n"));
 		}
 
+		return true;
 	}
 
 
