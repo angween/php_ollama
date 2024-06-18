@@ -12,14 +12,16 @@ require_once( $path . "vendor/autoload.php");
 // load ini file
 $ini = parse_ini_file( $path . '.env', true);
 
-define('APP_SESSION'     , $ini['app'   ]['SESSION'    ]);
-define('APP_NAME'        , $ini['app'   ]['NAME'       ]);
-define('APP_DESCRIPTION' , $ini['app'   ]['DESCRIPTION']);
-define('OLLAMA_GENERATE' , $ini['ollama']['GENERATE'   ]);
-define('OLLAMA_CHAT'     , $ini['ollama']['CHAT'       ]);
-define('OLLAMA_MODEL'    , $ini['ollama']['MODEL'      ]);
-define('CHAT_GREETING'   , $ini['ollama']['GREETING'   ]);
-define('CHAT_SYSTEM'     , $ini['ollama']['SYSTEM'     ]);
+define('APP_SESSION'        , $ini['app'    ]['SESSION'     ]);
+define('APP_NAME'           , $ini['app'    ]['NAME'        ]);
+define('APP_DESCRIPTION'    , $ini['app'    ]['DESCRIPTION' ]);
+
+define('OLLAMA_GENERATE'    , $ini['ollama' ]['GENERATE'    ]);
+define('OLLAMA_CHAT'        , $ini['ollama' ]['CHAT'        ]);
+define('OLLAMA_MODEL'       , $ini['ollama' ]['MODEL'       ]);
+define('OLLAMA_TEMPERATURE' , $ini['ollama' ]['TEMPERATURE' ]);
+define('CHAT_GREETING'      , $ini['ollama' ]['GREETING'    ]);
+define('CHAT_SYSTEM'        , $ini['ollama' ]['SYSTEM'      ]);
 
 if ($_SERVER['SERVER_NAME'] == 'localhost') {
 	define('DB_HOST'        , $ini['localhost']['DB_HOST' ]);

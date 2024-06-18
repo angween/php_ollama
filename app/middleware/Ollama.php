@@ -11,6 +11,7 @@ defined('APP_NAME') or exit('No direct script access allowed');
 class Ollama
 {
 	private const LLM = OLLAMA_MODEL ?? 'llama3';
+	private const LLM_TEMPERATURE = OLLAMA_TEMPERATURE ?? 0.6;
 
 	private const URL_GENERATE = OLLAMA_GENERATE ?? 'http://localhost:11434/api/generate';
 
@@ -76,14 +77,14 @@ class Ollama
 
 
 		// array to save later to file session
-		$conversationToSave[] = $newPrompt; 
+		$conversationToSave[] = $newPrompt;
 
 
 		// prepare chatData
 		$chatData = $this->prepareChatData(
 			llm: self::LLM,
 			conversationHistory: $conversationHistory,
-			temperature: 1
+			temperature: self::LLM_TEMPERATURE
 		);
 
 
@@ -118,7 +119,6 @@ class Ollama
 		$this->saveConversation(
 			sessionID: $sessionID,
 			newPrompt: $conversationToSave,
-			newResponse: $this->response
 		);
 
 		$this->response['sessionID'] = $this->sessionID;
@@ -175,7 +175,6 @@ class Ollama
 	private function saveConversation(
 		string $sessionID,
 		array $newPrompt,
-		array $newResponse,
 	): bool {
 		// set the $this->sessionID
 		if ($sessionID == 'new')
@@ -184,6 +183,7 @@ class Ollama
 		$filename = "../session/" . $sessionID . ".txt";
 
 		$this->sessionID = $sessionID;
+
 
 		// make it json
 		$conversation = json_encode($newPrompt);
