@@ -19,24 +19,24 @@ export class FormAI {
 
 
 	initForm = (container) => {
-		this.conversation = document.getElementById('conversations')
-
-		this.scrollButton = document.getElementById('scroll-button')
-
-		this.sessionHistory = document.getElementById('sessionHistory')
-
 		this.form = document.getElementById(container)
-
 		this.sessionName = this.form.querySelector('input[name="sessionId"]')
-
 		this.prompt = this.form.querySelector('textarea')
 
-		this.form.querySelector('button').addEventListener('click', this.submitForm)
+		this.conversation = document.getElementById('conversations')
+		this.scrollButton = document.getElementById('scroll-button')
+		this.sessionHistory = document.getElementById('sessionHistory')
 
-		this.conversation.addEventListener('scroll', this.toggleScrollButton)
 
-		this.toggleScrollButton()
+		// button parameters
+		document.getElementById('btnShowParameters').addEventListener('click', () => {
+			document.getElementById('modelParameters').classList.toggle('active')
+		})
 
+		// session load
+		this.triggerSessionLoad()
+
+		// add event listener
 		this.prompt.addEventListener('keypress', function (e) {
 			if (e.key === 'Enter') {
 				// Allow new line if Shift + Enter is pressed
@@ -50,9 +50,28 @@ export class FormAI {
 			}
 		})
 
-		// button parameters
-		document.getElementById('btnShowParameters').addEventListener('click', () => {
-			document.getElementById('modelParameters').classList.toggle('active')
+		this.form.querySelector('button').addEventListener('click', this.submitForm)
+
+		this.conversation.addEventListener('scroll', this.toggleScrollButton)
+
+		this.toggleScrollButton()
+	}
+
+
+	triggerSessionLoad = () => {
+		this.sessionHistory.addEventListener('click', (event) => {
+			event.preventDefault()
+
+			const linkElement = event.target.closest('a.list-group-item');
+
+			// Check if the clicked element or its parent is an <a> with the class 'list-group-item'
+			if (linkElement) {
+				// Get the data-id attribute value
+				const dataId = linkElement.getAttribute('data-id');
+
+				// Log the data-id value
+				console.log(dataId);
+			}
 		})
 	}
 
@@ -248,7 +267,7 @@ export class FormAI {
 
 	templateSessionHistory = () => {
 		return `
-<a class="list-group-item list-group-item-action d-flex justify-content-start p-3 ##ACTIVE##" href="" data-id="##ID##">
+<a class="load-session list-group-item list-group-item-action d-flex justify-content-start p-3 ##ACTIVE##" href="" data-id="##ID##">
 	<div class="avatar">
 		<img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="" class="img-avatar">
 	</div>

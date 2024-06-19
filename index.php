@@ -35,10 +35,10 @@ $greetingMessage = CHAT_GREETING;
 
 	<div class="container-lg chat-wrapper bg-light px-0">
 		<div class="left-panel">
-			<div class="left-nav-bar p-3 pb-0 bg-light">
+			<div class="left-nav-bar p-0 bg-light">
 				<!-- Login info -->
 				<!-- // TODO -->
-				<div class="d-flex justify-content-start">
+				<div class="d-flex p-3 justify-content-start border-bottom" style="max-height: 75px">
 					<img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="" class="img-avatar pull-left">
 
 					<div class="ms-2 d-none d-lg-block">User<br><span class="fw-light">Your chat history</span></div>
@@ -46,7 +46,7 @@ $greetingMessage = CHAT_GREETING;
 
 				<!-- History search -->
 				<!-- // TODO -->
-				<div class="mt-4">
+				<div class="p-3 border-top" style="margin-top: 4px">
 					<form id="frmSearchSession">
 						<div class="input-group">
 							<input type="text" class="form-control" placeholder="Search..." name="search">
@@ -79,7 +79,7 @@ $greetingMessage = CHAT_GREETING;
 			</div>
 		</div>
 
-		<div class="right-panel overflow-hidden">
+		<div class="right-panel w-100 overflow-hidden">
 			<div class="right-nav-bar d-flex align-items-center bg-light p-3">
 				<div class="d-lg-none d-md-block" id="ms-menu-trigger">
 					<button type="button" class="btn btn-outline-secondary"><i class="bi bi-list"></i></button>
@@ -115,7 +115,7 @@ $greetingMessage = CHAT_GREETING;
 			<div id="modelParameters" class="d-flex flex-column justify-content-start w-100">
 				<div class="parameters py-3 px-5 bg-light border-bottom">
 					<div class="row mb-3">
-						<label for="llm" class="col-md-2 col-form-label">LLM</label>
+						<label for="llm" class="col-md-2 col-form-label d-none d-lg-block d-xl-none">LLM</label>
 
 						<div class="col-md-10">
 							<select id="llm" name="llm" form="frmPrompt" class="form-select">
@@ -127,7 +127,7 @@ $greetingMessage = CHAT_GREETING;
 					</div>
 
 					<div class="row mb-3">
-						<label for="general" class="col-md-2 col-form-label">Topic</label>
+						<label for="general" class="col-md-2 col-form-label d-none d-lg-block d-xl-none">Topic</label>
 
 						<div class="col-md-10">
 							<input type="radio" class="btn-check" value="database" name="topic" form="frmPrompt"
