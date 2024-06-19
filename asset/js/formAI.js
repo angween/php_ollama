@@ -67,10 +67,32 @@ export class FormAI {
 			// Check if the clicked element or its parent is an <a> with the class 'list-group-item'
 			if (linkElement) {
 				// Get the data-id attribute value
-				const dataId = linkElement.getAttribute('data-id');
+				const dataId = linkElement.getAttribute('data-id')
 
 				// Log the data-id value
-				console.log(dataId);
+				console.log(dataId)
+
+				// Request the session data
+				this.ajax({
+					url: 'app/Router.php',
+					method: 'GET',
+					data: {
+						path: 'ollama/loadSessionId',
+						sessionID: dataId
+					},
+					success: (data) => {
+						console.log(data)
+						if (data.status != 'success' ) {
+							alert(data.message)
+						}
+
+						this.sessionHistory.innerHTML = ""
+				
+						data.rows.forEach(row => {
+							this.appendSessionHistory(row, false, false)
+						})
+					}
+				})
 			}
 		})
 	}
@@ -101,7 +123,7 @@ export class FormAI {
 				if (sessionID) {
 					this.setSessionID(sessionID)
 
-					this.appendSessionHistory(sessionID, true)
+					this.appendSessionHistory(sessionID, true, true)
 				}
 
 				this.createMessage(data)
@@ -124,7 +146,7 @@ export class FormAI {
 	}
 
 
-	appendSessionHistory = (sessionID, isActive) => {
+	appendSessionHistory = (sessionID, isActive, onTop) => {
 		// if sessionID is in sessionHistoryID then return
 		if ( this.sessionHistoryID.includes(sessionID['id']) ) return
 
@@ -143,7 +165,13 @@ export class FormAI {
 		template = template.replace('##TIME##', created)
 		template = template.replace('##TITLE##', sessionID['title'])
 
-		this.sessionHistory.innerHTML += template
+
+		if ( !onTop ) {
+			this.sessionHistory.innerHTML += template
+		} else {
+			console.log('ontop')
+			this.sessionHistory.insertAdjacentHTML('beforebegin', template)
+		}
 
 		this.sessionHistoryID.push(sessionID['id'])
 	}
@@ -351,7 +379,7 @@ export class FormAI {
 
 				this.sessionHistory.innerHTML = ""
 				
-				data.rows.forEach(row => {
+				data.rows.reverse().forEach(row => {
 					this.appendSessionHistory(row, false)
 				})
 			},
