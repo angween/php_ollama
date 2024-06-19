@@ -104,7 +104,6 @@ export class FormAI {
 					})
 
 					// scroll conversation to bottom
-					// this.conversation.scrollTop = this.conversation.scrollHeight
 					setTimeout(() => {
 						this.scrollToBottomChat()
 					}, 100);
@@ -142,7 +141,7 @@ export class FormAI {
 				Accept: 'application/json'
 			},
 			success: (data) => {
-				console.log(data)
+				console.log(data) // not all the response's format have been translated
 
 				const sessionID = data['sessionID'] || null
 
@@ -266,15 +265,12 @@ export class FormAI {
 
 	toggleScrollButtonHide = () => {
         // Check if the conversation is scrolled to the bottom
+		// 50 is total padding height
         const isAtBottom = this.chatWindow.scrollHeight - this.chatWindow.scrollTop <= this.chatWindow.clientHeight + 50;
 
-		console.log(this.chatWindow.scrollHeight, this.chatWindow.scrollTop, this.chatWindow.clientHeight)
-
 		if (isAtBottom) {
-			console.log('isAtBottom', isAtBottom)
             this.scrollButton.style.display = 'none'; // Hide scroll button
         } else {
-			console.log('not bottom', isAtBottom)
             this.scrollButton.style.display = 'block'; // Show scroll button
         }
 	}
