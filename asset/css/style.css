@@ -219,6 +219,10 @@ body {
     border-right: 1px solid #fff;
 }
 
+.user-list .list-group-item+.list-group-item.active {
+    margin-top: unset;
+}
+
 .user-list .list-group-item small {
     white-space: nowrap;
     overflow: hidden;

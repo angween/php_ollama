@@ -3,10 +3,10 @@ export class FormAI {
 		if (parameter.container) this.initForm(parameter.container)
 
 		// load add session history
-		this.loadAllSessionID()
+		this.sessionIDloadAll()
 
 		// identify all the conversation history
-		this.getAllSessionHistoryID()
+		this.sessionHistoryIDgetAll()
 
 		// greeting message
 		setTimeout(() => {
@@ -72,7 +72,6 @@ export class FormAI {
 		this.sessionHistory.addEventListener('click', (event) => {
 			event.preventDefault()
 
-
 			const linkElement = event.target.closest('a.list-group-item');
 
 			// Check if the clicked element or its parent is an <a> with the class 'list-group-item'
@@ -80,7 +79,6 @@ export class FormAI {
 
 			// Get the data-id attribute value
 			const dataId = linkElement.getAttribute('data-id')
-
 
 			// Request the session data
 			this.ajax({
@@ -116,6 +114,9 @@ export class FormAI {
 
 					// set linkelement became active
 					linkElement.classList.add('active')
+
+					// set sessionID to the prompt
+					this.sessionIDset({id:dataId})
 				}
 			})
 
@@ -141,14 +142,14 @@ export class FormAI {
 				Accept: 'application/json'
 			},
 			success: (data) => {
-				console.log(data) // not all the response's format have been translated
+				console.log(data) // TODO not all the response's format have been translated
 
 				const sessionID = data['sessionID'] || null
 
 				if (sessionID) {
-					this.setSessionID(sessionID)
+					this.sessionIDset(sessionID)
 
-					this.appendSessionHistory(sessionID, true, true)
+					this.sessionHistoryAppend(sessionID, true, true)
 				}
 
 				this.createMessage(data)
@@ -166,12 +167,12 @@ export class FormAI {
 	}
 
 
-	setSessionID = (sessionID) => {
+	sessionIDset = (sessionID) => {
 		this.sessionName.value = sessionID['id']
 	}
 
 
-	appendSessionHistory = (sessionID, isActive, onTop) => {
+	sessionHistoryAppend = (sessionID, isActive, onTop) => {
 		// if sessionID is in sessionHistoryID then return
 		if (this.sessionHistoryID.includes(sessionID['id'])) return
 
@@ -382,7 +383,7 @@ export class FormAI {
 	}
 
 
-	getAllSessionHistoryID = () => {
+	sessionHistoryIDgetAll = () => {
 		const anchors = document.querySelectorAll('#sessionHistory a');
 
 		// Extract the data-id attributes
@@ -390,7 +391,7 @@ export class FormAI {
 	}
 
 
-	loadAllSessionID = () => {
+	sessionIDloadAll = () => {
 		// return
 
 		this.ajax({
@@ -408,7 +409,7 @@ export class FormAI {
 				this.sessionHistory.innerHTML = ""
 
 				data.rows.reverse().forEach(row => {
-					this.appendSessionHistory(row, false)
+					this.sessionHistoryAppend(row, false)
 				})
 			},
 			error: (xhr) => {

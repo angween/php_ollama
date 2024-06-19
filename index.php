@@ -97,16 +97,16 @@ $greetingMessage = CHAT_GREETING;
 				</div>
 
 				<div class="list-group list-group-horizontal ms-auto">
-					<a href="#" class="list-group-item list-group-item-action">
-						<i class="bi bi-trash text-danger"></i>
+					<a href="#" title="New conversation" class="list-group-item list-group-item-action">
+						<i class="bi bi-chat"></i>
 					</a>
-
-					<a href="#" class="list-group-item list-group-item-action">
-						<i class="bi bi-arrow-clockwise"></i>
-					</a>
-
-					<a href="#" class="list-group-item list-group-item-action">
+					
+					<a href="#" title="Share conversation" class="list-group-item list-group-item-action">
 						<i class="bi bi-share"></i>
+					</a>
+
+					<a href="#" title="Delete conversation" class="list-group-item list-group-item-action">
+						<i class="bi bi-trash text-danger"></i>
 					</a>
 				</div>
 			</div>
@@ -115,9 +115,9 @@ $greetingMessage = CHAT_GREETING;
 			<div id="modelParameters" class="d-flex flex-column justify-content-start w-100">
 				<div class="parameters py-3 px-5 bg-light border-bottom">
 					<div class="row mb-3">
-						<label for="llm" class="col-md-2 col-form-label d-none d-lg-block d-xl-none">LLM</label>
+						<label for="llm" class="col-xl-2 col-form-label d-md-none d-lg-none d-xl-block d-none">LLM</label>
 
-						<div class="col-md-10">
+						<div class="col-xl-10">
 							<select id="llm" name="llm" form="frmPrompt" class="form-select">
 								<option value="1" selected>Llama3</option>
 
@@ -127,9 +127,9 @@ $greetingMessage = CHAT_GREETING;
 					</div>
 
 					<div class="row mb-3">
-						<label for="general" class="col-md-2 col-form-label d-none d-lg-block d-xl-none">Topic</label>
+						<label for="general" class="col-xl-2 col-form-label d-md-none d-lg-none d-xl-block d-none">Topic</label>
 
-						<div class="col-md-10">
+						<div class="col-xl-10">
 							<input type="radio" class="btn-check" value="database" name="topic" form="frmPrompt"
 								id="database" autocomplete="off">
 							<label class="btn" for="database">Database</label>
