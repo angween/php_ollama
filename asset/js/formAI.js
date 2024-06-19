@@ -2,19 +2,14 @@ export class FormAI {
 	constructor(parameter) {
 		if (parameter.container) this.initForm(parameter.container)
 
-		// load add session history
+		// load all session history
 		this.sessionIDloadAll()
 
-		// identify all the conversation history
+		// list all the loaded conversation history
 		this.sessionHistoryIDgetAll()
 
 		// greeting message
-		setTimeout(() => {
-			this.createMessage({
-				role: 'assistant',
-				content: parameter.greeting
-			})
-		}, 1000)
+		this.sessionNew(parameter.greeting)
 	}
 
 
@@ -22,6 +17,7 @@ export class FormAI {
 		this.form = document.getElementById(container)
 		this.sessionName = this.form.querySelector('input[name="sessionId"]')
 		this.prompt = this.form.querySelector('textarea')
+		this.loader = document.getElementById('loader')
 
 		this.conversation = document.getElementById('conversation')
 		this.scrollButton = document.getElementById('scrollButton')
@@ -64,7 +60,30 @@ export class FormAI {
 			this.toggleScrollButtonHide();
 		})
 
-		//this.toggleScrollButtonHide()
+		this.toggleScrollButtonHide()
+
+		// hide loader
+		this.loaderToggle()
+	}
+
+
+	sessionNew = (greeting) => {
+		this.conversation.innerHTML = ''
+
+		// unset sessionId value
+		this.sessionName.value = 'new'
+
+		setTimeout(() => {
+			this.createMessage({
+				role: 'assistant',
+				content: greeting
+			})
+		}, 200)
+	}
+
+
+	loaderToggle = () => {
+		this.loader.classList.toggle('d-none')
 	}
 
 
@@ -79,6 +98,9 @@ export class FormAI {
 
 			// Get the data-id attribute value
 			const dataId = linkElement.getAttribute('data-id')
+
+			// show loader
+			this.loaderToggle()
 
 			// Request the session data
 			this.ajax({
@@ -100,6 +122,9 @@ export class FormAI {
 					respon.data.forEach(chat => {
 						this.createMessage(chat)
 					})
+
+					// hide loader
+					this.loaderToggle()
 
 					// scroll conversation to bottom
 					setTimeout(() => {

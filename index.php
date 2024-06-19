@@ -30,8 +30,16 @@ $greetingMessage = CHAT_GREETING;
 	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@100..900&display=swap" rel="stylesheet">
 </head>
 
-<body>
-	<div class="text-center my-3">Most of the feature are not working yet...</div>
+<body class="pt-3">
+
+	<div id="loader" class="d-flex justify-content-center align-items-center vh-100 bg-dark opacity-25">
+		<div class="spinner-border text-light" role="status">
+			<span class="visually-hidden">Loading...</span>
+		</div>
+	</div>
+
+
+	<!-- <div class="text-center my-3">Most of the feature are not working yet...</div> -->
 
 	<div class="container-lg chat-wrapper bg-light px-0">
 		<div class="left-panel">
@@ -63,6 +71,27 @@ $greetingMessage = CHAT_GREETING;
 			<!-- Conversation history -->
 			<div class="user-list overflow-x-hidden overflow-y-auto flex-fill flex-grow-1 bg-light">
 				<div id="sessionHistory" class="list-group">
+
+					<!-- Placeholder -->
+					<span class="list-group-item list-group-item-action d-flex justify-content-start p-3 bg-light">
+						<div class="avatar">
+							<div class="img-avatar placeholder"></div>
+						</div>
+						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
+							<small class="username"><span class="placeholder col-7"></span></small>
+							<small class="text-truncate"><span class="placeholder col-12"></span></small>
+						</div>
+					</span>
+
+					<span class="list-group-item list-group-item-action d-flex justify-content-start p-3 bg-light">
+						<div class="avatar">
+							<div class="img-avatar placeholder"></div>
+						</div>
+						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
+							<small class="username"><span class="placeholder col-7"></span></small>
+							<small class="text-truncate"><span class="placeholder col-12"></span></small>
+						</div>
+					</span>
 
 					<span class="list-group-item list-group-item-action d-flex justify-content-start p-3 bg-light">
 						<div class="avatar">
@@ -100,7 +129,7 @@ $greetingMessage = CHAT_GREETING;
 					<a href="#" title="New conversation" class="list-group-item list-group-item-action">
 						<i class="bi bi-chat"></i>
 					</a>
-					
+
 					<a href="#" title="Share conversation" class="list-group-item list-group-item-action">
 						<i class="bi bi-share"></i>
 					</a>
@@ -115,7 +144,8 @@ $greetingMessage = CHAT_GREETING;
 			<div id="modelParameters" class="d-flex flex-column justify-content-start w-100">
 				<div class="parameters py-3 px-5 bg-light border-bottom">
 					<div class="row mb-3">
-						<label for="llm" class="col-xl-2 col-form-label d-md-none d-lg-none d-xl-block d-none">LLM</label>
+						<label for="llm"
+							class="col-xl-2 col-form-label d-md-none d-lg-none d-xl-block d-none">LLM</label>
 
 						<div class="col-xl-10">
 							<select id="llm" name="llm" form="frmPrompt" class="form-select">
@@ -127,7 +157,8 @@ $greetingMessage = CHAT_GREETING;
 					</div>
 
 					<div class="row mb-3">
-						<label for="general" class="col-xl-2 col-form-label d-md-none d-lg-none d-xl-block d-none">Topic</label>
+						<label for="general"
+							class="col-xl-2 col-form-label d-md-none d-lg-none d-xl-block d-none">Topic</label>
 
 						<div class="col-xl-10">
 							<input type="radio" class="btn-check" value="database" name="topic" form="frmPrompt"
@@ -151,7 +182,8 @@ $greetingMessage = CHAT_GREETING;
 			<div class="chat-window pb-5">
 				<div id="conversation"></div>
 
-				<button id="scrollButton" class="scroll-button rounded-circle position-absolute"><i class="bi bi-arrow-down"></i></button>
+				<button id="scrollButton" class="scroll-button rounded-circle position-absolute"><i
+						class="bi bi-arrow-down"></i></button>
 			</div>
 
 			<form class="message-input border-top" id="frmPrompt">
