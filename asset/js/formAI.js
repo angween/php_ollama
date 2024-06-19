@@ -2,6 +2,9 @@ export class FormAI {
 	constructor(parameter) {
 		if (parameter.container) this.initForm(parameter.container)
 
+		// load add session history
+		this.loadAllSessionID()
+			
 		// identify all the conversation history
 		this.getAllSessionHistoryID()
 
