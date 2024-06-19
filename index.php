@@ -38,9 +38,6 @@ $greetingMessage = CHAT_GREETING;
 		</div>
 	</div>
 
-
-	<!-- <div class="text-center my-3">Most of the feature are not working yet...</div> -->
-
 	<div class="container-lg chat-wrapper bg-light px-0">
 		<div class="left-panel">
 			<div class="left-nav-bar p-0 bg-light">

@@ -10,6 +10,8 @@ export class FormAI {
 
 		// greeting message
 		this.sessionNew(parameter.greeting)
+
+		alert('Some features still on development.')
 	}
 
 
