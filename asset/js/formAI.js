@@ -254,7 +254,7 @@ export class FormAI {
 	</div>
 	<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
 		<small class="username">##TIME##</small>
-		<small class="text-truncate">##TITLE##</small>
+		<small class="text-truncate fw-light">##TITLE##</small>
 	</div>
 </a>
 `
@@ -316,6 +316,8 @@ export class FormAI {
 
 
 	loadAllSessionID = () => {
+		// return
+
 		this.ajax({
 			url: 'app/Router.php',
 			method: 'POST',
@@ -327,6 +329,8 @@ export class FormAI {
 			},
 			success: (data) => {
 				if (data.status != 'success') return 
+
+				this.sessionHistory.innerHTML = ""
 				
 				data.rows.forEach(row => {
 					this.appendSessionHistory(row, false)

@@ -14,7 +14,7 @@ $greetingMessage = CHAT_GREETING;
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Chat With Your Database</title>
+	<title>Chat With Your Database with Ollama</title>
 
 	<!-- Vendor Assets -->
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -35,13 +35,13 @@ $greetingMessage = CHAT_GREETING;
 
 	<div class="container-lg chat-wrapper bg-light px-0">
 		<div class="left-panel">
-			<div class="left-nav-bar p-3 bg-light">
+			<div class="left-nav-bar p-3 pb-0 bg-light">
 				<!-- Login info -->
 				<!-- // TODO -->
 				<div class="d-flex justify-content-start">
 					<img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="" class="img-avatar pull-left">
 
-					<div class="ms-2 d-none d-lg-block">User<br> anonymous</div>
+					<div class="ms-2 d-none d-lg-block">User<br><span class="fw-light">Your chat history</span></div>
 				</div>
 
 				<!-- History search -->
@@ -61,8 +61,21 @@ $greetingMessage = CHAT_GREETING;
 			</div>
 
 			<!-- Conversation history -->
-			<div class="user-list overflow-x-hidden overflow-y-auto bg-light flex-fill flex-grow-1">
-				<div id="sessionHistory" class="list-group"></div>
+			<div class="user-list overflow-x-hidden overflow-y-auto flex-fill flex-grow-1 bg-light">
+				<div id="sessionHistory" class="list-group">
+
+					<span class="list-group-item list-group-item-action d-flex justify-content-start p-3 bg-light">
+						<div class="avatar">
+							<div class="img-avatar placeholder"></div>
+						</div>
+						<div class="media-body px-2 ps-2 d-flex flex-column justify-content-between">
+							<small class="username"><span class="placeholder col-7"></span></small>
+							<small class="text-truncate"><span class="placeholder col-12"></span></small>
+						</div>
+					</span>
+
+
+				</div>
 			</div>
 		</div>
 
@@ -117,12 +130,12 @@ $greetingMessage = CHAT_GREETING;
 						<label for="general" class="col-md-2 col-form-label">Topic</label>
 
 						<div class="col-md-10">
-							<input type="radio" class="btn-check" value="database" name="topic" form="frmPrompt" id="database"
-								autocomplete="off">
+							<input type="radio" class="btn-check" value="database" name="topic" form="frmPrompt"
+								id="database" autocomplete="off">
 							<label class="btn" for="database">Database</label>
 
-							<input type="radio" class="btn-check" value="general" name="topic" form="frmPrompt" id="general"
-								autocomplete="off" checked>
+							<input type="radio" class="btn-check" value="general" name="topic" form="frmPrompt"
+								id="general" autocomplete="off" checked>
 							<label class="btn" for="general">General Question</label>
 						</div>
 					</div>
