@@ -149,9 +149,9 @@ $greetingMessage = CHAT_GREETING;
 
 			<!-- Conversation container -->
 			<div class="chat-window pb-5">
-				<div id="conversations"></div>
+				<div id="conversation"></div>
 
-				<button id="scroll-button" class="scroll-button"><i class="bi bi-arrow-down"></i></button>
+				<button id="scrollButton" class="scroll-button rounded-circle position-absolute"><i class="bi bi-arrow-down"></i></button>
 			</div>
 
 			<form class="message-input border-top" id="frmPrompt">

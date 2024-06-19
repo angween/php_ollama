@@ -4,7 +4,7 @@ export class FormAI {
 
 		// load add session history
 		this.loadAllSessionID()
-			
+
 		// identify all the conversation history
 		this.getAllSessionHistoryID()
 
@@ -23,9 +23,10 @@ export class FormAI {
 		this.sessionName = this.form.querySelector('input[name="sessionId"]')
 		this.prompt = this.form.querySelector('textarea')
 
-		this.conversation = document.getElementById('conversations')
-		this.scrollButton = document.getElementById('scroll-button')
+		this.conversation = document.getElementById('conversation')
+		this.scrollButton = document.getElementById('scrollButton')
 		this.sessionHistory = document.getElementById('sessionHistory')
+		this.chatWindow = document.querySelector('.chat-window')
 
 
 		// button parameters
@@ -36,8 +37,8 @@ export class FormAI {
 		// session load
 		this.triggerSessionLoad()
 
-		// add event listener
-		this.prompt.addEventListener('keypress', function (e) {
+		// prompt entered
+		this.prompt.addEventListener('keypress', (e) => {
 			if (e.key === 'Enter') {
 				// Allow new line if Shift + Enter is pressed
 				if (e.shiftKey) {
@@ -50,11 +51,20 @@ export class FormAI {
 			}
 		})
 
+
+		// scrollbutton pressed
+		this.scrollButton.addEventListener('click', () => {
+			this.scrollToBottomChat()
+		})
+
 		this.form.querySelector('button').addEventListener('click', this.submitForm)
 
-		this.conversation.addEventListener('scroll', this.toggleScrollButton)
+		// this.conversation.addEventListener('scroll', () => {
+		this.chatWindow.addEventListener('scroll', () => {
+			this.toggleScrollButtonHide();
+		})
 
-		this.toggleScrollButton()
+		//this.toggleScrollButtonHide()
 	}
 
 
@@ -62,38 +72,54 @@ export class FormAI {
 		this.sessionHistory.addEventListener('click', (event) => {
 			event.preventDefault()
 
+
 			const linkElement = event.target.closest('a.list-group-item');
 
 			// Check if the clicked element or its parent is an <a> with the class 'list-group-item'
-			if (linkElement) {
-				// Get the data-id attribute value
-				const dataId = linkElement.getAttribute('data-id')
+			if (!linkElement) return
 
-				// Log the data-id value
-				console.log(dataId)
+			// Get the data-id attribute value
+			const dataId = linkElement.getAttribute('data-id')
 
-				// Request the session data
-				this.ajax({
-					url: 'app/Router.php',
-					method: 'GET',
-					data: {
-						path: 'ollama/loadSessionId',
-						sessionID: dataId
-					},
-					success: (data) => {
-						console.log(data)
-						if (data.status != 'success' ) {
-							alert(data.message)
-						}
 
-						this.sessionHistory.innerHTML = ""
-				
-						data.rows.forEach(row => {
-							this.appendSessionHistory(row, false, false)
-						})
+			// Request the session data
+			this.ajax({
+				url: 'app/Router.php',
+				method: 'POST',
+				data: {
+					path: 'ollama/loadSessionId',
+					sessionID: dataId
+				},
+				success: (respon) => {
+					if (respon.status != 'success') {
+						alert(respon.message)
 					}
-				})
-			}
+
+					// empty the conversation
+					this.conversation.innerHTML = ''
+
+					// render the conversation
+					respon.data.forEach(chat => {
+						this.createMessage(chat)
+					})
+
+					// scroll conversation to bottom
+					// this.conversation.scrollTop = this.conversation.scrollHeight
+					setTimeout(() => {
+						this.scrollToBottomChat()
+					}, 100);
+
+
+					// remove active from all a.list-group-item
+					this.sessionHistory.querySelectorAll('a.list-group-item').forEach(link => {
+						link.classList.remove('active')
+					})
+
+					// set linkelement became active
+					linkElement.classList.add('active')
+				}
+			})
+
 		})
 	}
 
@@ -148,7 +174,7 @@ export class FormAI {
 
 	appendSessionHistory = (sessionID, isActive, onTop) => {
 		// if sessionID is in sessionHistoryID then return
-		if ( this.sessionHistoryID.includes(sessionID['id']) ) return
+		if (this.sessionHistoryID.includes(sessionID['id'])) return
 
 		// or append in left-side
 		let template = this.templateSessionHistory()
@@ -166,7 +192,7 @@ export class FormAI {
 		template = template.replace('##TITLE##', sessionID['title'])
 
 
-		if ( !onTop ) {
+		if (!onTop) {
 			this.sessionHistory.innerHTML += template
 		} else {
 			console.log('ontop')
@@ -238,26 +264,32 @@ export class FormAI {
 	}
 
 
-	toggleScrollButton = () => {
-		if (this.conversation.scrollTop + this.conversation.clientHeight >= this.conversation.scrollHeight - 1) {
-			console.log('1')
-			// this.scrollButton.style.display = 'none !important'
-			this.scrollButton.classList.remove('d-block')
-		} else {
-			console.log('2', this.scrollButton)
-			// this.scrollButton.style.display = 'block !important'
-			this.scrollButton.classList.add('d-block')
-		}
+	toggleScrollButtonHide = () => {
+        // Check if the conversation is scrolled to the bottom
+        const isAtBottom = this.chatWindow.scrollHeight - this.chatWindow.scrollTop <= this.chatWindow.clientHeight + 50;
+
+		console.log(this.chatWindow.scrollHeight, this.chatWindow.scrollTop, this.chatWindow.clientHeight)
+
+		if (isAtBottom) {
+			console.log('isAtBottom', isAtBottom)
+            this.scrollButton.style.display = 'none'; // Hide scroll button
+        } else {
+			console.log('not bottom', isAtBottom)
+            this.scrollButton.style.display = 'block'; // Show scroll button
+        }
 	}
+
 
 	scrollToBottomChat = () => {
-		this.conversation.scrollTo({
-			top: this.conversation.scrollHeight,
-			behavior: 'smooth'
-		})
+		const lastMessage = this.conversation.lastElementChild
 
-		this.toggleScrollButton()
+		if (lastMessage) {
+			lastMessage.scrollIntoView({ behavior: 'smooth', block: 'end' });
+		}
+
+		this.toggleScrollButtonHide()
 	}
+
 
 	templateUserMessage = () => {
 		return `
@@ -375,10 +407,10 @@ export class FormAI {
 				Accept: 'application/json'
 			},
 			success: (data) => {
-				if (data.status != 'success') return 
+				if (data.status != 'success') return
 
 				this.sessionHistory.innerHTML = ""
-				
+
 				data.rows.reverse().forEach(row => {
 					this.appendSessionHistory(row, false)
 				})

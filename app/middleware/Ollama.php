@@ -83,7 +83,7 @@ class Ollama
 
 				$conversationToSave = $conversationHistory;
 			} else {
-				$conversationHistory = $this->loadConversation(filename: $sessionID, newPrompt: $newPrompt);
+				$conversationHistory = $this->loadConversation(filename: $sessionID);
 			}
 
 			// append new prompt
@@ -139,6 +139,27 @@ class Ollama
 		$this->controller->response(message: $this->response);
 	}
 
+
+	public function loadSessionId() :void
+	{
+		$sessionID = $this->router->clientPost['sessionID'] ?? null;
+
+		$content = $this->loadConversation(filename: $sessionID);
+
+		$filteredArray = array_filter($content, function($element) {
+			return $element['role'] !== 'system';
+		});
+		
+		// Reindex the array to have consecutive numeric keys
+		$filteredArray = array_values($filteredArray);
+
+		$result = [
+			'status' => 'success',
+			'data' => $filteredArray
+		];
+
+		$this->controller->response(message: $result);
+	}
 
 	public function loadSessionHistory() :void 
 	{
@@ -202,8 +223,7 @@ class Ollama
 	}
 
 	private function loadConversation(
-		string $filename,
-		array $newPrompt,
+		string $filename
 	): ?array {
 		$filename = self::SESSION_PATH . $filename . ".txt";
 
