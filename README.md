@@ -20,6 +20,7 @@ TODO:
 * Delete conversation
 * Start New conversation
 * Share/Export conversation
+* Search conversation
 * Dynamically show LLMs for selection, by retrieving the LLMs model with Ollama CLI
 * (Long term) add serpapi for searching external data from internet
 * (Long term) as Telegram Bot
