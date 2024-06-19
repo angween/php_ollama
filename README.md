@@ -4,4 +4,8 @@ Trying to access [Ollama](https://ollama.com) with PHP. Main purpose is to conne
 
 For this test I'm using PHP 8.2^ and MariaDB.
 
+For LLM's model on Ollama I'm using:
+1. LLama3: from Meta
+2. Qwen2: Good for other language beside English
+
 [Lazwardi](https://github.com/angween) | ...

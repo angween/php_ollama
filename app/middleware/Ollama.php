@@ -28,6 +28,8 @@ class Ollama
 
 	private const SYSTEM_CONTENT_DATABASE = "You are an SQL expert and Data Analyst for a company, based on following table schema bellow, answer the question bellow only in the correct SQL Query format, so the system can run that SQL Query to retrieve to answer.";
 
+	private const SESSION_PATH = '../session/';
+
 	public function __construct(
 		private ?Controller $controller = null,
 		private ?Router $router = null,
@@ -138,11 +140,72 @@ class Ollama
 	}
 
 
+	public function loadSessionHistory() :void 
+	{
+		$files = scandir(self::SESSION_PATH);
+
+		$data = [];
+
+		foreach ($files as $file) {
+			// Check if the file is a .txt file
+			if (pathinfo($file, PATHINFO_EXTENSION) === 'txt') {
+				// Extract the date part from the filename (first 12 characters)
+				$datePart = substr($file, 0, 10);
+
+				// echo "FILE: $file \n";
+				// echo "DATE: $datePart \n";
+
+				// Validate date part format
+				if (preg_match('/^\d{10}$/', $datePart)) {
+					// Parse the date part
+					$year = '20' . substr($datePart, 0, 2);
+					$month = substr($datePart, 2, 2);
+					$day = substr($datePart, 4, 2);
+					$hour = substr($datePart, 6, 2);
+					$minute = substr($datePart, 8, 2);
+
+					// Convert the hour to the desired timezone (assuming +7)
+					$dateTime = new \DateTime("$year-$month-$day $hour:$minute");
+					$dateTime->setTimezone(new \DateTimeZone('Asia/Jakarta')); // +7 timezone
+
+					// Format the date
+					// $formattedDate = $dateTime->format('d/m/Y \a\t H:i');
+					$timestamp = $dateTime->getTimestamp();
+
+					$filePath = self::SESSION_PATH . $file;
+
+					// Read the first 200 characters from the file
+					$fileContent = file_get_contents($filePath, false, null, 0, 500);
+
+					// Extract the second user conversation
+					$conversation = '';
+					if (preg_match('/"role":"user","content":"([^"]+)"/', $fileContent, $matches)) {
+						$conversation = $matches[1];
+					}
+
+					// Add the formatted date and file content to the array
+					$data[] = [
+						'id' => str_replace('.txt', '', $file),
+						'created' => $timestamp,
+						'title' => $conversation
+					];
+				}
+			}
+		}
+
+		$result = [
+			'status' => 'success',
+			'rows' => $data
+		];
+
+		$this->controller->response(message: $result);
+	}
+
 	private function loadConversation(
 		string $filename,
 		array $newPrompt,
 	): ?array {
-		$filename = "../session/" . $filename . ".txt";
+		$filename = self::SESSION_PATH . $filename . ".txt";
 
 		if (file_exists($filename)) {
 			$contentFile = file_get_contents($filename);
@@ -167,7 +230,7 @@ class Ollama
 		if ($sessionID == 'new')
 			$sessionID = date('ymd') . '_' . uniqid();
 
-		$filename = "../session/" . $sessionID . "txt";
+		$filename = self::SESSION_PATH . $sessionID . "txt";
 
 		$this->sessionID = $sessionID;
 
@@ -189,7 +252,7 @@ class Ollama
 		// set the $this->sessionID
 		if ($sessionID == 'new') $sessionID = date('ymdhi') . '_' . uniqid();
 
-		$filename = "../session/" . $sessionID . ".txt";
+		$filename = self::SESSION_PATH . $sessionID . ".txt";
 
 		$this->sessionID = $sessionID;
 

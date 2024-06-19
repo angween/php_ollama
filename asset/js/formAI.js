@@ -313,4 +313,32 @@ export class FormAI {
 		// Extract the data-id attributes
 		this.sessionHistoryID = Array.from(anchors).map(anchor => anchor.getAttribute('data-id'));
 	}
+
+
+	loadAllSessionID = () => {
+		this.ajax({
+			url: 'app/Router.php',
+			method: 'POST',
+			data: {
+				path: 'ollama/loadSessionHistory',
+			},
+			headers: {
+				Accept: 'application/json'
+			},
+			success: (data) => {
+				if (data.status != 'success') return 
+				
+				data.rows.forEach(row => {
+					this.appendSessionHistory(row, false)
+				})
+			},
+			error: (xhr) => {
+				console.error('Error:', xhr)
+			},
+			complete: (xhr) => {
+				// console.log('Request completed')
+			}
+		})
+
+	}
 }
