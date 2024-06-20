@@ -19,17 +19,6 @@ export class FormAI {
 	}
 
 
-	sessionHistoryLoader = () => {
-		this.sessionHistoryID = []
-
-		// load all session history
-		this.sessionHistoryLoad()
-
-		// list all the loaded conversation history
-		this.sessionHistoryIDgetAll()
-	}
-
-
 	initVariables = (parameter) => {
 		this.form = document.getElementById(parameter.frmElement)
 		this.sessionName = this.form.querySelector('input[name="sessionId"]')
@@ -102,6 +91,17 @@ export class FormAI {
 
 	loaderToggle = () => {
 		this.loader.classList.toggle('d-none')
+	}
+
+
+	sessionHistoryLoader = () => {
+		this.sessionHistoryID = []
+
+		// load all session history
+		this.sessionHistoryLoad()
+
+		// list all the loaded conversation history
+		this.sessionHistoryIDgetAll()
 	}
 
 
@@ -518,8 +518,8 @@ export class FormAI {
 
 				alert('Coversation deleted.')
 
+				// TODO
 				this.sessionHistoryLoader()
-				// this.sessionHistoryLoad()
 				
 				this.sessionNew()
 			},
