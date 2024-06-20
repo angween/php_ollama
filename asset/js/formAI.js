@@ -31,7 +31,7 @@ export class FormAI {
 		this.chatWindow = document.querySelector('.chat-window')
 
 		this.btnConversationNew = document.getElementById('btnConversationNew')
-		this.btnConversationShare = document.getElementById('btnConversationShare')
+		this.btnConversationDownload = document.getElementById('btnConversationDownload')
 		this.btnConversationDelete = document.getElementById('btnConversationDelete')
 
 		this.greetingMessage = parameter.greetingMessage
@@ -40,7 +40,7 @@ export class FormAI {
 
 	initTrigger = () => {
 		this.btnConversationNew.addEventListener('click', this.sessionNew)
-		this.btnConversationShare.addEventListener('click', this.sessionShare)
+		this.btnConversationDownload.addEventListener('click', this.sessionDownload)
 		this.btnConversationDelete.addEventListener('click', this.sessionDelete)
 
 		// conversation load
@@ -94,11 +94,11 @@ export class FormAI {
 	}
 
 
-	sessionHistoryLoader = () => {
+	sessionHistoryLoader = async () => {
 		this.sessionHistoryID = []
 
 		// load all session history
-		this.sessionHistoryLoad()
+		await this.sessionHistoryLoad()
 
 		// list all the loaded conversation history
 		this.sessionHistoryIDgetAll()
@@ -402,7 +402,7 @@ export class FormAI {
 	}
 
 
-	ajax = (options) => {
+	/* ajax = (options) => {
 		const xhr = new XMLHttpRequest()
 		const method = options.method || 'GET'
 		const url = options.url || ''
@@ -445,19 +445,79 @@ export class FormAI {
 			xhr.setRequestHeader('Accept', 'application/json')
 			xhr.send(data ? JSON.stringify(data) : null)
 		}
+	} */
+
+	
+	ajax = (options) => {
+		return new Promise((resolve, reject) => {
+			const xhr = new XMLHttpRequest()
+			const method = options.method || 'GET'
+			const url = options.url || ''
+			const async = options.async !== undefined ? options.async : true
+			const data = options.data || null
+			const headers = options.headers || {}
+
+			xhr.open(method, url, async)
+
+			// Set headers
+			for (const header in headers) {
+				if (headers.hasOwnProperty(header)) {
+					xhr.setRequestHeader(header, headers[header])
+				}
+			}
+
+			xhr.onreadystatechange = function () {
+				if (xhr.readyState === XMLHttpRequest.DONE) {
+					if (xhr.status >= 200 && xhr.status < 300) {
+						const response = xhr.responseText
+
+						const jsonResponse = JSON.parse(response)
+
+						if (options.success) {
+							options.success(jsonResponse)
+						}
+
+						resolve(jsonResponse)
+					} else {
+						if (options.error) {
+							options.error(xhr)
+						}
+
+						reject(xhr)
+					}
+					if (options.complete) {
+						options.complete(xhr)
+					}
+				}
+			}
+
+			// Send FormData or JSON data
+			if (data instanceof FormData) {
+				xhr.setRequestHeader('Accept', 'application/json')
+
+				xhr.send(data)
+			} else {
+				xhr.setRequestHeader('Content-Type', 'application/json')
+
+				xhr.setRequestHeader('Accept', 'application/json')
+
+				xhr.send(data ? JSON.stringify(data) : null)
+			}
+		})
 	}
 
+	
 
 	sessionHistoryIDgetAll = () => {
-		const anchors = document.querySelectorAll('#sessionHistory a');
+		const anchors = document.querySelectorAll('#sessionHistory a')
 
 		// Extract the data-id attributes
-		this.sessionHistoryID = Array.from(anchors).map(anchor => anchor.getAttribute('data-id'));
+		this.sessionHistoryID = Array.from(anchors).map(anchor => anchor.getAttribute('data-id'))
 	}
 
 
-	sessionHistoryLoad = () => {
-		this.ajax({
+	sessionHistoryLoad = async () => {
+		await this.ajax({
 			url: 'app/Router.php',
 			method: 'POST',
 			data: {
@@ -483,11 +543,47 @@ export class FormAI {
 			}
 		})
 
+		return
 	}
 
 
-	sessionShare = () => {
+	sessionDownload = () => {
+		// Get the content of the HTML element
+		const title = this.sessionName.value
+		const messages = this.conversation.querySelectorAll('.message-feed')
 
+		let textContent = ''
+
+		// convert the conversation to text
+		messages.forEach(message => {
+			const isUser = message.classList.contains('right')
+			const userType = isUser ? 'USER' : 'BOT'
+
+			const dateElement = message.querySelector('.mf-date')
+			const dateText = dateElement ? dateElement.textContent.trim() : ''
+
+			const contentElement = message.querySelector('.mf-content')
+			let contentText = contentElement ? contentElement.textContent.replace(/\s+/g, ' ').trim() : ''
+
+			textContent += `(${dateText}) ${userType}: ${contentText}\n\n`
+		})
+
+
+		// Create a Blob from the content
+		const blob = new Blob([textContent], { type: 'text/plain' })
+
+		// Create a download link for the Blob
+		const link = document.createElement('a')
+
+		link.href = URL.createObjectURL(blob)
+
+		link.download = `${title}.txt` // Specify the file name
+
+		// Programmatically click the download link to trigger the download
+		link.click()
+
+		// Revoke the object URL after the download
+		URL.revokeObjectURL(link.href)
 	}
 
 

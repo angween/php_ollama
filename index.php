@@ -127,8 +127,8 @@ $greetingMessage = CHAT_GREETING;
 						<i class="bi bi-chat"></i>
 					</a>
 
-					<a id="btnConversationShare" href="#" title="Share conversation" class="list-group-item list-group-item-action">
-						<i class="bi bi-share"></i>
+					<a id="btnConversationDownload" href="#" title="Download conversation" class="list-group-item list-group-item-action">
+						<i class="bi bi-floppy"></i>
 					</a>
 
 					<a id="btnConversationDelete" href="#" title="Delete conversation" class="list-group-item list-group-item-action">

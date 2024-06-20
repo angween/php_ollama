@@ -255,7 +255,7 @@ class Ollama
 
 		$filename = self::SESSION_PATH . $sessionID . ".txt";
 		
-		if ( file_exists($filename) /* && unlink($filename) */) {
+		if ( file_exists($filename) && unlink($filename) ) {
 			$result = [
 				'status' => 'success'
 			];
