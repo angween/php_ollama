@@ -32,7 +32,7 @@ $greetingMessage = CHAT_GREETING;
 
 <body class="pt-3">
 
-	<div id="loader" class="d-flex justify-content-center align-items-center vh-100 bg-dark opacity-25">
+	<div id="loader" class="d-flex justify-content-center align-items-center vh-100 bg-dark opacity-50">
 		<div class="spinner-border text-light" role="status">
 			<span class="visually-hidden">Loading...</span>
 		</div>
@@ -123,15 +123,15 @@ $greetingMessage = CHAT_GREETING;
 				</div>
 
 				<div class="list-group list-group-horizontal ms-auto">
-					<a href="#" title="New conversation" class="list-group-item list-group-item-action">
+					<a id="btnConversationNew" href="#" title="New conversation" class="list-group-item list-group-item-action">
 						<i class="bi bi-chat"></i>
 					</a>
 
-					<a href="#" title="Share conversation" class="list-group-item list-group-item-action">
+					<a id="btnConversationShare" href="#" title="Share conversation" class="list-group-item list-group-item-action">
 						<i class="bi bi-share"></i>
 					</a>
 
-					<a href="#" title="Delete conversation" class="list-group-item list-group-item-action">
+					<a id="btnConversationDelete" href="#" title="Delete conversation" class="list-group-item list-group-item-action">
 						<i class="bi bi-trash text-danger"></i>
 					</a>
 				</div>
@@ -199,8 +199,8 @@ $greetingMessage = CHAT_GREETING;
 		import { FormAI } from "./asset/js/formAI.js<?= $uniq ?>"
 
 		new FormAI({
-			container: 'frmPrompt',
-			greeting: '<?= $greetingMessage ?>'
+			frmElement: 'frmPrompt',
+			greetingMessage: '<?= $greetingMessage ?>'
 		})
 	</script>
 </body>

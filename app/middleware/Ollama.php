@@ -242,26 +242,31 @@ class Ollama
 	}
 
 
-	private function saveConversationOLD(
-		string $sessionID,
-		array $conversation,
-	): bool {
-		// set the $this->sessionID
-		if ($sessionID == 'new')
-			$sessionID = date('ymd') . '_' . uniqid();
+	public function deleteSession(): void {
+		$sessionID = $this->router->clientPost['sessionID'] ?? '_no_file_';
 
-		$filename = self::SESSION_PATH . $sessionID . "txt";
+		if ( ! is_string($sessionID) ) {
+			$result = [
+				'status' => 'failed',
+				'message' => 'Invalid Conversation ID!'
+			];
+			$this->controller->response(message: $result);
+		}
 
-		$this->sessionID = $sessionID;
+		$filename = self::SESSION_PATH . $sessionID . ".txt";
+		
+		if ( file_exists($filename) /* && unlink($filename) */) {
+			$result = [
+				'status' => 'success'
+			];
+		} else {
+			$result = [
+				'status' => 'failed',
+				'message' => 'File not found!'
+			];
+		}
 
-		// print_r($conversation); exit;
-
-		// Save the updated array back to the file
-		$jsonArray = json_encode($conversation);
-
-		file_put_contents($filename, $jsonArray);
-
-		return true;
+		$this->controller->response(message: $result);
 	}
 
 

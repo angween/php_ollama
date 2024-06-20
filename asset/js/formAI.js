@@ -1,40 +1,86 @@
 export class FormAI {
 	constructor(parameter) {
-		if (parameter.container) this.initForm(parameter.container)
+		this.initVariables(parameter)
 
-		// load all session history
-		this.sessionIDloadAll()
+		// chat form
+		this.initForm()
 
-		// list all the loaded conversation history
-		this.sessionHistoryIDgetAll()
+		// load conversation history
+		this.sessionHistoryLoader()
+
+		// trigger
+		this.initTrigger()
 
 		// greeting message
-		this.sessionNew(parameter.greeting)
+		this.sessionNew()
 
-		alert('Some features still on development.')
+		// disclaimer
+		alert('Some features are still on development.')
 	}
 
 
-	initForm = (container) => {
-		this.form = document.getElementById(container)
+	sessionHistoryLoader = () => {
+		this.sessionHistoryID = []
+
+		// load all session history
+		this.sessionHistoryLoad()
+
+		// list all the loaded conversation history
+		this.sessionHistoryIDgetAll()
+	}
+
+
+	initVariables = (parameter) => {
+		this.form = document.getElementById(parameter.frmElement)
 		this.sessionName = this.form.querySelector('input[name="sessionId"]')
 		this.prompt = this.form.querySelector('textarea')
 		this.loader = document.getElementById('loader')
-
+	
 		this.conversation = document.getElementById('conversation')
 		this.scrollButton = document.getElementById('scrollButton')
-		this.sessionHistory = document.getElementById('sessionHistory')
+		this.sessionHistoryContainer = document.getElementById('sessionHistory')
 		this.chatWindow = document.querySelector('.chat-window')
 
+		this.btnConversationNew = document.getElementById('btnConversationNew')
+		this.btnConversationShare = document.getElementById('btnConversationShare')
+		this.btnConversationDelete = document.getElementById('btnConversationDelete')
 
-		// button parameters
+		this.greetingMessage = parameter.greetingMessage
+	}
+
+
+	initTrigger = () => {
+		this.btnConversationNew.addEventListener('click', this.sessionNew)
+		this.btnConversationShare.addEventListener('click', this.sessionShare)
+		this.btnConversationDelete.addEventListener('click', this.sessionDelete)
+
+		// conversation load
+		this.sessionHistoryClick()
+
+		// scrollbutton pressed
+		this.scrollButton.addEventListener('click', () => {
+			this.scrollToBottomChat()
+		})
+
+		// button toggle AI options
 		document.getElementById('btnShowParameters').addEventListener('click', () => {
 			document.getElementById('modelParameters').classList.toggle('active')
 		})
 
-		// session load
-		this.triggerSessionLoad()
+		// this.conversation.addEventListener('scroll', () => {
+		this.chatWindow.addEventListener('scroll', () => {
+			this.toggleScrollButtonHide();
+		})
 
+		// toggle show/hide scroll to bottom button
+		this.toggleScrollButtonHide()
+
+		// hide page loader
+		this.loaderToggle()
+	}
+
+
+	initForm = () => {
 		// prompt entered
 		this.prompt.addEventListener('keypress', (e) => {
 			if (e.key === 'Enter') {
@@ -49,38 +95,8 @@ export class FormAI {
 			}
 		})
 
-
-		// scrollbutton pressed
-		this.scrollButton.addEventListener('click', () => {
-			this.scrollToBottomChat()
-		})
-
+		// send / submit button
 		this.form.querySelector('button').addEventListener('click', this.submitForm)
-
-		// this.conversation.addEventListener('scroll', () => {
-		this.chatWindow.addEventListener('scroll', () => {
-			this.toggleScrollButtonHide();
-		})
-
-		this.toggleScrollButtonHide()
-
-		// hide loader
-		this.loaderToggle()
-	}
-
-
-	sessionNew = (greeting) => {
-		this.conversation.innerHTML = ''
-
-		// unset sessionId value
-		this.sessionName.value = 'new'
-
-		setTimeout(() => {
-			this.createMessage({
-				role: 'assistant',
-				content: greeting
-			})
-		}, 200)
 	}
 
 
@@ -89,13 +105,29 @@ export class FormAI {
 	}
 
 
-	triggerSessionLoad = () => {
-		this.sessionHistory.addEventListener('click', (event) => {
+	sessionNew = () => {
+		this.conversation.innerHTML = ''
+
+		// unset sessionId value
+		this.sessionName.value = 'new'
+
+		setTimeout(() => {
+			this.createMessage({
+				role: 'assistant',
+				content: this.greetingMessage
+			})
+		}, 200)
+	}
+
+
+
+	sessionHistoryClick = () => {
+		this.sessionHistoryContainer.addEventListener('click', (event) => {
 			event.preventDefault()
 
+			// Check if the clicked element or its parent is an <a> with the class 'list-group-item'
 			const linkElement = event.target.closest('a.list-group-item');
 
-			// Check if the clicked element or its parent is an <a> with the class 'list-group-item'
 			if (!linkElement) return
 
 			// Get the data-id attribute value
@@ -135,9 +167,7 @@ export class FormAI {
 
 
 					// remove active from all a.list-group-item
-					this.sessionHistory.querySelectorAll('a.list-group-item').forEach(link => {
-						link.classList.remove('active')
-					})
+					this.sessionHistoryRemoveActive()
 
 					// set linkelement became active
 					linkElement.classList.add('active')
@@ -209,6 +239,8 @@ export class FormAI {
 		let created = this.currentTime(sessionID['created'])
 
 		if (isActive) {
+			this.sessionHistoryRemoveActive()
+
 			template = template.replace('##ACTIVE##', 'active')
 		} else {
 			template = template.replace('##ACTIVE##', '')
@@ -220,13 +252,19 @@ export class FormAI {
 
 
 		if (!onTop) {
-			this.sessionHistory.innerHTML += template
+			this.sessionHistoryContainer.innerHTML += template
 		} else {
 			console.log('ontop')
-			this.sessionHistory.insertAdjacentHTML('beforebegin', template)
+			this.sessionHistoryContainer.insertAdjacentHTML('beforebegin', template)
 		}
 
 		this.sessionHistoryID.push(sessionID['id'])
+	}
+
+	sessionHistoryRemoveActive = () => {
+		this.sessionHistoryContainer.querySelectorAll('a.list-group-item').forEach(link => {
+			link.classList.remove('active')
+		})
 	}
 
 
@@ -418,9 +456,7 @@ export class FormAI {
 	}
 
 
-	sessionIDloadAll = () => {
-		// return
-
+	sessionHistoryLoad = () => {
 		this.ajax({
 			url: 'app/Router.php',
 			method: 'POST',
@@ -433,7 +469,7 @@ export class FormAI {
 			success: (data) => {
 				if (data.status != 'success') return
 
-				this.sessionHistory.innerHTML = ""
+				this.sessionHistoryContainer.innerHTML = ""
 
 				data.rows.reverse().forEach(row => {
 					this.sessionHistoryAppend(row, false)
@@ -447,5 +483,49 @@ export class FormAI {
 			}
 		})
 
+	}
+
+
+	sessionShare = () => {
+
+	}
+
+
+	sessionDelete = () => {
+		// get current session ID
+		const sessionID = this.sessionName.value
+
+		if (sessionID == 'new') return 
+
+		if (!confirm('Are you sure you want to delete this conversation?')) return
+
+		this.ajax({
+			url: 'app/Router.php',
+			method: 'POST',
+			data: {
+				path: 'ollama/deleteSession',
+				sessionID: sessionID
+			},
+			headers: {
+				Accept: 'application/json'
+			},
+			success: (data) => {
+				if (data.status != 'success') {
+					alert(data.message)
+
+					return
+				}
+
+				alert('Coversation deleted.')
+
+				this.sessionHistoryLoader()
+				// this.sessionHistoryLoad()
+				
+				this.sessionNew()
+			},
+			error: (xhr) => {
+				console.error('Error:', xhr)
+			}
+		})
 	}
 }
