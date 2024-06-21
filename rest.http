@@ -5,9 +5,11 @@ Accept: application/json
 
 {
   "model": "qwen2",
-  "prompt": "Kenapa laut bewarna biru?",
-  "stream": false,
-  "format": "json",
+  "options": {
+    "temperature": 0
+  },
+  "prompt": "You are interacting with a user who is asking a question about the company's database. Based on the question below, response it with MySQL Query only, no chit-chat only SQL.\n\nQuestion: How to show my customer's name?",
+  "stream": false
 }
 
 ### chat dengan history
@@ -16,8 +18,31 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "model": "qwen2",
-  "format": "json",
+  "model": "llama3",
+  "stream": false,
+  "options": {
+    "temperature": 0
+  },
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are interacting with a user who is asking a question about the company's data. Based on the user question below, response it with MySQL Query only, no chit-chat only SQL."
+    },
+    {
+      "role": "user",
+      "content": "Tell me some of my customers name."
+    }
+  ]
+}
+
+
+### chat dengan history
+POST http://localhost:11434/api/chat HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "model": "llama3",
   "stream": false,
   "options": {
     "temperature": 1
@@ -29,8 +54,7 @@ Accept: application/json
     },
     {
       "role": "user",
-      "content": "How to make my pizza?"
+      "content": "do you have sibling?"
     }
-  ],
-  "prompt": "How do I save my princess?"
+  ]
 }

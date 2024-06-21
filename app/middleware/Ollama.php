@@ -12,21 +12,21 @@ defined('APP_NAME') or exit('No direct script access allowed');
 
 class Ollama
 {
-	private const LLM = OLLAMA_MODEL ?? 'llama3';
+	public const LLM = OLLAMA_MODEL ?? 'llama3';
 
 	private const LLM_MODELS = OLLAMA_MODEL_LIST ?? [];
 
-	private const LLM_TEMPERATURE = OLLAMA_TEMPERATURE ?? 0.6;
+	public const LLM_TEMPERATURE = OLLAMA_TEMPERATURE ?? 0.6;
 
 	private const LLM_TOPIC = ['database', 'general'];
 
-	private const URL_GENERATE = OLLAMA_GENERATE ?? 'http://localhost:11434/api/generate';
+	public const URL_GENERATE = OLLAMA_GENERATE ?? 'http://localhost:11434/api/generate';
 
-	private const URL_CHAT = OLLAMA_CHAT ?? 'http://localhost:11434/api/chat';
+	public const URL_CHAT = OLLAMA_CHAT ?? 'http://localhost:11434/api/chat';
 
-	private const SYSTEM_CONTENT_GENERAL = CHAT_SYSTEM ?? "You are an helpfull assistant, answer the user's question with the same language given.";
+	public const SYSTEM_CONTENT_GENERAL = CHAT_SYSTEM ?? "You are an helpfull assistant, answer the user's question with the same language given.";
 
-	private const SYSTEM_CONTENT_DATABASE = "You are an SQL expert and Data Analyst for a company, based on following table schema bellow, answer the question bellow only in the correct SQL Query format, so the system can run that SQL Query to retrieve to answer.";
+	public const SYSTEM_CONTENT_DATABASE = CHAT_SYSTEM_DB ?? "You are an SQL expert and Data Analyst for a company, based on following table schema bellow, answer the question bellow only in the correct SQL Query format, so the system can run that SQL Query to retrieve to answer.\n\nSchema: #SCHEMA#\n\nQuestion: #QUESTION#";
 
 	private const SESSION_PATH = '../session/';
 
@@ -37,21 +37,21 @@ class Ollama
 		private ?array $response = null,
 		private array $conversationHistory = [],
 		private array $post = [],
-		private string $sessionID = ""
+		private string $sessionID = "",
+		public string $prompt = "",
+		public string $llm = "",
 	) {
 		$this->controller = $controller;
 
 		$this->router = $router;
-
-		$this->ollamaDB = $ollamaDB ?? new OllamaDB;
 	}
 
 	public function prompt()
 	{
 		// get all payload
-		$prompt = $this->getPrompt();
+		$this->prompt = $this->getPrompt();
 
-		$llm = $this->getLLM();
+		$this->llm = $this->getLLM();
 		
 		$topic = $this->getTopic();
 
@@ -61,7 +61,7 @@ class Ollama
 		// new prompt
 		$newPrompt = [
 			'role' => 'user',
-			'content' => $prompt,
+			'content' => $this->prompt,
 			'created' => time()
 		];
 
@@ -91,7 +91,7 @@ class Ollama
 
 			// prepare chatData
 			$chatData = $this->prepareChatData(
-				llm: $llm,
+				llm: $this->llm,
 				conversationHistory: $conversationHistory,
 				temperature: self::LLM_TEMPERATURE
 			);
@@ -105,15 +105,20 @@ class Ollama
 			// 	"content" => "It's-a me, Mario! Ahahahaha! Don't worry, I'm on it! That no-good Koopa King is always causing trouble!"
 			// ];
 		}
-		else if ($topic == 'database' ) {
-			
-			$this->response = $this->ollamaDB->promptDB(url: self::URL_CHAT, ollama: $this);
-		}
 
+		else if ($topic == 'database' ) {
+			$this->ollamaDB = new OllamaDB(
+				ollama: $this,
+				router: $this->router,
+				controller: $this->controller,
+			);
+
+			$this->response = $this->ollamaDB->promptDB(url: self::URL_CHAT);
+		}
 
 		// handle respon
 		if (!$this->response) {
-			throw new \Exception("AI did not Response!");
+			throw new \Exception("AI did not Response, make sure Ollama is running, and the selected model is exists!");
 		} else {
 			$this->response['created'] = time();
 		}
@@ -131,7 +136,7 @@ class Ollama
 
 		$this->response['sessionID'] = [
 			'id' => $this->sessionID,
-			'title' => $prompt,
+			'title' => $this->prompt,
 			'created' => time()
 		];
 
@@ -195,7 +200,7 @@ class Ollama
 
 					$filePath = self::SESSION_PATH . $file;
 
-					// Read the first 200 characters from the file
+					// Read the first 500 characters from the file
 					$fileContent = file_get_contents($filePath, false, null, 0, 500);
 
 					// Extract the second user conversation
@@ -281,7 +286,6 @@ class Ollama
 
 		$this->sessionID = $sessionID;
 
-
 		// make it json
 		$conversation = json_encode($newPrompt);
 
@@ -308,7 +312,7 @@ class Ollama
 	}
 
 
-	private function getResponOllama(string $url, array $chatData)
+	public function getResponOllama(string $url, array $chatData)
 	{
 		$ch = curl_init();
 
@@ -387,7 +391,7 @@ class Ollama
 	}
 
 
-	private function prepareChatData(
+	public function prepareChatData(
 		string $llm,
 		array $conversationHistory,
 		float $temperature = 0.5,

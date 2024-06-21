@@ -14,7 +14,8 @@ if ( ! $router->getPath()?->execute() ) {
 	$router->controller->response(
 		message: [
 			'status' => 'error',
-			'message' => $router->errorMessage
+			'message' => $router->errorMessage,
+			'sender' => 'Router',
 		]
 	);
 }

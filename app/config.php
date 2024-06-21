@@ -23,6 +23,7 @@ define('OLLAMA_MODEL_LIST'  , $ini['ollama' ]['MODEL_LIST'  ]);
 define('OLLAMA_TEMPERATURE' , $ini['ollama' ]['TEMPERATURE' ]);
 define('CHAT_GREETING'      , $ini['ollama' ]['GREETING'    ]);
 define('CHAT_SYSTEM'        , $ini['ollama' ]['SYSTEM'      ]);
+define('CHAT_SYSTEM_DB'     , $ini['ollama' ]['SYSTEM_DB'   ]);
 
 if ($_SERVER['SERVER_NAME'] == 'localhost') {
 	define('DB_HOST'        , $ini['localhost']['DB_HOST' ]);
