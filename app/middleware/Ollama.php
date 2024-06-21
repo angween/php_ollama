@@ -69,6 +69,12 @@ class Ollama
 		$conversationToSave = [];
 
 
+		// is client expectiong SSE?
+		if ($this->router->clientAccept == 'text/event-stream') {
+			$this->router->startStreaming();
+		}
+
+
 		// send chatData to Ollama
 		if ( $topic == 'general') {
 			// load or set new conversation
@@ -120,6 +126,7 @@ class Ollama
 		if (!$this->response) {
 			throw new \Exception("AI did not Response, make sure Ollama is running, and the selected model is exists!");
 		} else {
+			$this->response['status'] = 'success';
 			$this->response['created'] = time();
 		}
 
@@ -141,7 +148,13 @@ class Ollama
 		];
 
 		// return respon to Front End
-		$this->controller->response(message: $this->response);
+		if ($this->router->isStreaming ) {
+			$this->router->sendStream(message: json_encode($this->response));
+
+			$this->router->endStreaming();
+		} else {
+			$this->controller->response(message: $this->response);
+		}
 	}
 
 
@@ -326,6 +339,18 @@ class Ollama
 			'Content-Type: application/json',
 			'Content-Length: ' . strlen($chatData)
 		]);
+
+		// is it streaming?
+		if ( $this->router->isStreaming ) {
+			$message = json_encode([
+				'status' => 'working',
+				'role' => 'system',
+				'content' => 'Thinking...',
+				'created' => time()
+			]);
+
+			$this->router->sendStream(message: $message);
+		}
 
 		// Execute the cURL request
 		$response = curl_exec($ch);

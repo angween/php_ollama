@@ -28,6 +28,7 @@ class Router {
 		public ?string $clientAccept = null,
 		public ?array $clientPost = null,
 		public ?array $requestContentType = null,
+		public bool $isStreaming = false,
 	) {
 		$this->getRequest();
 		$this->controller = $this->controller ?? new Controller(router: $this);
@@ -90,7 +91,11 @@ class Router {
 
 	private function getPost(?string $value = null)
 	{
-		if (
+		if ( $_GET ) {
+			foreach ($_GET as $key => $value) {
+				$path['post'][$key] = $value;
+			}
+		} elseif (
 			$this->cekContentType('application/x-www-form-urlencoded')
 			|| $this->cekContentType('multipart/form-data')
 		) {
@@ -162,11 +167,65 @@ class Router {
 		}
 		
 		catch (\Exception $e ) {
-			$this->errorMessage = $e->getMessage();
+			if ($this->isStreaming) {
+				$message = json_encode([
+					'status' => 'error',
+					'message' => $e->getMessage()
+				]);
+
+				$this->sendStream(message: $message);
+
+				$this->stopStreaming();
+			} else {
+				$this->errorMessage = $e->getMessage();
+			}
 
 			return null;
 		}
 	}
+
+
+	public function startStreaming()
+	{
+		if ($this->isStreaming) return;
+
+		header('Content-Type: text/event-stream');
+		header('Cache-Control: no-cache');
+		header('Connection: keep-alive');
+
+		$this->isStreaming = true;
+	}
+
+
+	public function stopStreaming()
+	{
+		if (! $this->isStreaming) return;
+
+		$this->isStreaming = false;
+	}
+
+
+	public function sendStream(string $message, ?string $id = null)
+	{
+		if ( ! $id ) $id = uniqid();
+
+		echo "id: $id\n";
+
+		echo "data: $message\n\n";
+
+		ob_flush();
+
+		flush();
+	}
+
+
+	public function endStreaming()
+	{
+		$this->stopStreaming();
+
+		exit;
+	}
+
 
 	public function response()
 	{
