@@ -428,9 +428,9 @@ class Ollama
 
 	private function getLLM() :string 
 	{
-		$llm = $this->router->clientPost['llm'] ?? null;
+		$llm = (int) $this->router->clientPost['llm'] ?? -1;
 
-		if ( ! in_array( $llm, self::LLM_MODELS) ) $llm = self::LLM;
+		$llm = self::LLM_MODELS[$llm] ?? self::LLM;
 
 		return $llm;
 	}

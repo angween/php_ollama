@@ -17,6 +17,27 @@ class OllamaDB
 
 	private ?Database $db = null;
 
+	private const SYSTEM_CONTENT = <<<END
+### Instructions:
+Your task is to convert a question into a SQL query, given a MySQL database schema.
+Adhere to these rules:
+- **Deliberately go through the question and database schema word by word** to appropriately answer the question
+- **Use Table Aliases** to prevent ambiguity. For example, `SELECT table1.col1, table2.col1 FROM table1 JOIN table2 ON table1.id = table2.id`.
+- When creating a ratio, always cast the numerator as float
+- Add limit in Query to 10 rows except if tells differently
+- No need to Reasoning
+
+### Input:
+Generate a SQL query that answers the question `{question}`.
+This query will run on a database whose schema is represented in this string:
+
+{SCHEMA}
+
+### Response:
+Based on your instructions, here is the SQL query I have generated to answer the question `{question}`:
+```sql
+END;
+
 	public function __construct(
 		private ?Ollama $ollama = null,
 		private ?Router $router = null,
@@ -43,14 +64,16 @@ class OllamaDB
 		$schema = $this->getTableSchema();
 
 		// add schema to role
-		$systemRole['content'] = str_replace('#SCHEMA#', $schema, $systemRole['content']);
+		// $systemRole['content'] = str_replace('#SCHEMA#', $schema, $systemRole['content']);
 
 		// add user's prompt to the role
 		// $systemRole['content'] = str_replace('#QUESTION', $this->ollama->prompt, $systemRole['content']);
-		$systemRole['content'] = addslashes( $systemRole['content'] );
+		// $systemRole['content'] = addslashes( $systemRole['content'] );
 
 		// get query result from ollama
-		$this->getQueryFromOllama(systemRole: $systemRole);
+		$resultQuery = $this->getQueryFromOllama(systemRole: $systemRole, schema: $schema);
+
+		print_r($resultQuery);
 
 		exit;
 		$content = <<<END
@@ -70,7 +93,8 @@ END;
 
 
 	private function getQueryFromOllama(
-		array $systemRole
+		array $systemRole,
+		string $schema
 	){
 		// message to Ollama if the query return error result
 		$errorResult = '';
@@ -97,12 +121,15 @@ END;
 					"content" => "Please generate another SQL Query because the last query return this error message: " . addslashes($errorResult)
 				];
 
-
-				echo "Coba perbaiki query yg salah:\n\n";
+				echo "\nMencoba perbaiki query yg salah: $errorResult\n\n";
 
 				$errorResult = '';
 			} else {
 				// conversation based on the URL type
+				$systemContent = self::SYSTEM_CONTENT;
+				$systemContent = str_replace('{SCHEMA}', $schema, $systemContent);
+				$systemContent = str_replace('{question}', $this->ollama->prompt, $systemContent);
+
 				$conversationChat = [
 					"model" => $this->ollama->llm,
 					"stream" => false,
@@ -112,66 +139,68 @@ END;
 					"messages" => [
 						[
 							"role" => "system",
-							"content" => $systemRole['content']
-						],
-						[
-							"role" => "user",
-							"content" => $this->ollama->prompt
+							"content" => $systemContent
 						]
 					]
 				];
+
+				print_r($conversationChat);
 			}
 
-			print_r($conversationChat);
-
-
 			// send to Ollama
-			$response = $this->ollama->getResponOllama(
+			$responseAI = $this->ollama->getResponOllama(
 				url: $this->ollama::URL_CHAT,
 				chatData: $conversationChat
 			);
 
 			// get only the SQL Query from the response
-			$sqlQuery = $this->extractSQLquery(responseOllama: $response);
+			$sqlQuery = $this->extractSQLquery(responseOllama: $responseAI['content']);
 
+			// if not SQL Query found
+			if ( $sqlQuery == '' ) {
+				$errorResult = "Query result not found";
 
-			// added the message history
-			$conversationChat['messages'][] = [
-				'role' => 'assistant',
-				'content' => addslashes( $sqlQuery )
-			];
+				continue;
+			}
 
 			// run the query
 			$resultQuery = $this->db->runQuery(query: $sqlQuery);
 
+			// added the message history
+			$conversationChat['messages'][] = [
+				'role' => 'assistant',
+				'content' => $responseAI['content']
+			];
+
+
+			// return respon
 			if ( $resultQuery['status'] == 'error') {
 				$errorResult = $resultQuery['message'];
 			} else {
-				return $resultQuery['data'];
+				if ( count( $resultQuery['data'] ) > 10 ) {
+					$respon = array_slice($resultQuery['data'], 0, 10);
+				} else {
+					$respon = $resultQuery['data'];
+				}
+
+				return $respon;
 			}
 		}
 	}
 
 
 	private function extractSQLquery(
-		array $responseOllama
-	){
-		echo "Respon Ollama:\n";
-		print_r( $responseOllama);
-		echo "\n\n";
+		string $responseOllama
+	) :string {
+		$pattern = '/SELECT.*?;/is';
 
-		$lines = explode("\n", $responseOllama['content']);
-		$sqlQueryLines = [];
-
-		foreach ($lines as $line) {
-			$trimmedLine = trim($line);
-			if (strpos($trimmedLine, 'SELECT') === 0 || strpos($trimmedLine, 'FROM') === 0 || strpos($trimmedLine, 'JOIN') === 0 || strpos($trimmedLine, 'GROUP BY') === 0 || strpos($trimmedLine, 'ORDER BY') === 0) {
-				$sqlQueryLines[] = $trimmedLine;
-			}
+		if (preg_match($pattern, $responseOllama, $matches)) {
+			$sqlQuery = $matches[0];
+		} else {
+			return "";
 		}
 
-		// Combine the SQL query lines into a single string
-		$sqlQuery = implode("\n", $sqlQueryLines);
+		echo "\n", $sqlQuery, "\n";
 
 		return $sqlQuery;
 	}
@@ -243,53 +272,76 @@ END;
 	private function getTableSchema(): string
 	{
 		// find the schema file
-		$filename = self::SCHEMA_PATH . DB_NAME . ".json";
+		$filename = self::SCHEMA_PATH . DB_NAME . ".txt";
 
 
 		// return the schemas
-		// if (file_exists($filename)) {
-		// 	$contentFile = file_get_contents($filename);
+		if (file_exists($filename)) {
+			$contentFile = file_get_contents($filename);
 
-		// 	return $contentFile;
-		// }
+			return $contentFile;
+		}
 
+		$result = [];
+
+		$table_names = $this->executeQueryToJson(
+			query: "SELECT table_name FROM information_schema.tables WHERE table_schema = '" . DB_NAME . "'",
+			key: 'table_names'
+		);
+
+		if ( count( $table_names ) == 0 ) throw new \Exception("Database doesn't any have table.");
+
+		$table_names = array_column($table_names, 'table_name');
+
+		foreach ($table_names as $table) {
+			$_showCreate = $this->executeQueryToJson(
+				query: "SHOW CREATE TABLE " . $table,
+				key: $table
+			);
+
+			$_showCreate = $_showCreate[0]['Create Table'] ?? '';
+
+			$_showCreate = str_replace(array("\r", "\n", "\r\n"), ' ', $_showCreate);
+
+			$result[] = preg_replace('/\s+/', ' ', $_showCreate);
+		}
 
 		// or create new schema from database
-		$queries = [
-			'table_names' => "SELECT table_name FROM information_schema.tables WHERE table_schema = '" . DB_NAME . "'",
+		// $queries = [
+		// 	'table_names' => "SELECT table_name FROM information_schema.tables WHERE table_schema = '" . DB_NAME . "'",
 
-			'table_names_and_column' => "SELECT table_name, column_name, data_type, column_key, 
-				is_nullable /* , column_default */ FROM information_schema.columns 
-				WHERE table_schema = '" . DB_NAME . "' ORDER BY table_name, ordinal_position",
+		// 	'table_names_and_column' => "SELECT table_name, column_name, data_type, column_key, 
+		// 		is_nullable /* , column_default */ FROM information_schema.columns 
+		// 		WHERE table_schema = '" . DB_NAME . "' ORDER BY table_name, ordinal_position",
 
-			'primary_keys' => "SELECT table_name, column_name 
-				FROM information_schema.key_column_usage 
-				WHERE table_schema = '" . DB_NAME . "' AND constraint_name = 'PRIMARY'",
+		// 	'primary_keys' => "SELECT table_name, column_name 
+		// 		FROM information_schema.key_column_usage 
+		// 		WHERE table_schema = '" . DB_NAME . "' AND constraint_name = 'PRIMARY'",
 
-			'foreign_keys' => "SELECT table_name, column_name, referenced_table_name, referenced_column_name
-				FROM information_schema.key_column_usage
-				WHERE table_schema = '" . DB_NAME . "'
-				AND referenced_table_name IS NOT NULL",
+		// 	'foreign_keys' => "SELECT table_name, column_name, referenced_table_name, referenced_column_name
+		// 		FROM information_schema.key_column_usage
+		// 		WHERE table_schema = '" . DB_NAME . "'
+		// 		AND referenced_table_name IS NOT NULL",
 
-			'indexes' => "SELECT table_name, index_name, column_name, non_unique
-				FROM information_schema.statistics
-				WHERE table_schema = '" . DB_NAME . "'
-				ORDER BY table_name, index_name, seq_in_index",
-		];
+		// 	'indexes' => "SELECT table_name, index_name, column_name, non_unique
+		// 		FROM information_schema.statistics
+		// 		WHERE table_schema = '" . DB_NAME . "'
+		// 		ORDER BY table_name, index_name, seq_in_index",
+		// ];
 
 		
-		foreach ($queries as $key => $query) {
-			$result[$key] = $this->executeQueryToJson(query: $query, key: $key);
-		}
+		// foreach ($queries as $key => $query) {
+		// 	$result[$key] = $this->executeQueryToJson(query: $query, key: $key);
+		// }
 		
 		if ($result) {
-			// format as JSON
-			$jsonResult = json_encode($result);
+			// format as txt
+			$saveResult = implode(";\n\n", array_values( $result) );
 
-			// save to JSON file
-			file_put_contents($filename, $jsonResult);
+			// save to file
+			file_put_contents($filename, $saveResult);
 
-			return $jsonResult;
+			return $saveResult;
 		}
 
 		// or return nothing
@@ -305,32 +357,34 @@ END;
 			throw new \Exception("Error generating database schema!");
 		}
 
-		// To make it smaller for AI token count, we have to short out the output
-		if ( $key == 'table_names') {
-			$response = array_column( $result['data'], 'table_name');
-		}
+		$response = $result['data'];
 
-		else {
-			$response = [];
+		// To make it smaller for AI token count, we have to short out the output
+		// if ( $key == 'table_names') {
+		// 	$response = array_column( $result['data'], 'table_name');
+		// }
+
+		// else {
+		// 	$response = [];
 
 			// Grouping data by table_name
-			foreach ($result['data'] as $row) {
-				$tableName = $row['table_name'];
+			// foreach ($result['data'] as $row) {
+			// 	$tableName = $row['table_name'];
 
-				if (!isset($response[$tableName])) {
-					$response[$tableName] = [];
-				}
+			// 	if (!isset($response[$tableName])) {
+			// 		$response[$tableName] = [];
+			// 	}
 
-				$entry = [];
-				foreach ($row as $key => $value) {
-					if ($key !== 'table_name') {
-						$entry[$key] = $value;
-					}
-				}
+			// 	$entry = [];
+			// 	foreach ($row as $key => $value) {
+			// 		if ($key !== 'table_name') {
+			// 			$entry[$key] = $value;
+			// 		}
+			// 	}
 
-				$response[$tableName][] = $entry;
-			}
-		}
+			// 	$response[$tableName][] = $entry;
+			// }
+		// }
 
 		// elseif ( $key == 'primary_keys') {}
 		// elseif ( $key == 'foreign_keys') {}

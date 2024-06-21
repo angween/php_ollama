@@ -4,6 +4,20 @@ Content-Type: application/json
 Accept: application/json
 
 {
+  "model": "llama3",
+  "options": {
+    "temperature": 0
+  },
+  "prompt": "Please explain this table schema: CREATE TABLE `album` ( `AlbumId` int(11) NOT NULL, `Title` varchar(160) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL, `ArtistId` int(11) NOT NULL, PRIMARY KEY (`AlbumId`), KEY `IFK_AlbumArtistId` (`ArtistId`), CONSTRAINT `FK_AlbumArtistId` FOREIGN KEY (`ArtistId`) REFERENCES `artist` (`ArtistId`) ON DELETE NO ACTION ON UPDATE NO ACTION ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci",
+  "stream": false
+}
+
+### generate
+POST http://localhost:11434/api/generate HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+{
   "model": "qwen2",
   "options": {
     "temperature": 0
