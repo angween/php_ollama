@@ -73,21 +73,57 @@ END;
 		// get query result from ollama
 		$resultQuery = $this->getQueryFromOllama(systemRole: $systemRole, schema: $schema);
 
-		print_r($resultQuery);
+		// if result is empty
+		if (empty($resultQuery)) {
+			if ($this->router->isStreaming) {
+				$content = "I'm sorry, I cannot find any result, please try again.";
 
-		exit;
+				$message = json_encode([
+					'status' => 'success',
+					'id' => 'new',
+					'role' => 'system',
+					'content' => $content,
+					'created' => time()
+				]);
+
+				$this->router->sendStream(message: $message);
+
+				$this->router->endStreaming();
+			}
+		}
+
+		// update progress
+		$message = json_encode([
+			'status' => 'working',
+			'role' => 'system',
+			'id' => $this->ollama->sessionID,
+			'content' => '(Typing...)',
+			'created' => time()
+		]);
+
+		$this->router->sendStream(message: $message);
+
+		// debug information
+		$this->debug(content: 'Result: ' . json_encode( $resultQuery) );
+
+		// response result in natural language
+		$jsonResult = json_encode($resultQuery);
+
+		$prompt = $this->ollama->prompt;
+
 		$content = <<<END
-"Based on the following SQL Query result, answer the user question with it using natural language.
+"Based on the following SQL Query result, answer the user question using natural language.
 
-Question: #question#
+Question: `".$prompt."`
 
-Query Result: $resultQuery
+Query Result: `$jsonResult`
 "
 END;
 
 		return [
 			"role" => "system",
 			"content" => $content,
+			"created" => time()
 		];
 	}
 
@@ -98,6 +134,7 @@ END;
 	){
 		// message to Ollama if the query return error result
 		$errorResult = '';
+		$progress = '';
 
 		/* 
 				$conversationGenerate = [
@@ -114,14 +151,16 @@ END;
 			  */
 
 
-		for ($i = 0; $i < self::MAX_LOOP; $i++) {
+		for ($i = 0; $i <= self::MAX_LOOP; $i++) {
 			if ( $errorResult != '' ) {
+				$progress = "(#".($i+1).": Trying another query...)";
+
 				$conversationChat['messages'][] = [
 					"role" => "system",
 					"content" => "Please generate another SQL Query because the last query return this error message: " . addslashes($errorResult)
 				];
 
-				echo "\nMencoba perbaiki query yg salah: $errorResult\n\n";
+				$this->debug(content: "\nMencoba perbaiki query yg salah: $errorResult");
 
 				$errorResult = '';
 			} else {
@@ -129,6 +168,7 @@ END;
 				$systemContent = self::SYSTEM_CONTENT;
 				$systemContent = str_replace('{SCHEMA}', $schema, $systemContent);
 				$systemContent = str_replace('{question}', $this->ollama->prompt, $systemContent);
+				$progress = '(#1: Querying database...)';
 
 				$conversationChat = [
 					"model" => $this->ollama->llm,
@@ -144,7 +184,19 @@ END;
 					]
 				];
 
-				print_r($conversationChat);
+				$this->debug(content: str_replace('{question}', $this->ollama->prompt, self::SYSTEM_CONTENT));
+			}
+
+			// report progress if isStreaming
+			if ($this->router->isStreaming ) {
+				$message = json_encode([
+					'status' => 'working',
+					'role' => 'system',
+					'content' => $progress,
+					'created' => time()
+				]);
+
+				$this->router->sendStream(message: $message);
 			}
 
 			// send to Ollama
@@ -200,12 +252,12 @@ END;
 			return "";
 		}
 
-		echo "\n", $sqlQuery, "\n";
+		$this->debug(content: "Generated Query: " . $sqlQuery);
 
 		return $sqlQuery;
 	}
 
-	private function runQueryFromOllama(): string
+	/* private function runQueryFromOllama(): string
 	{
 		// Initialize the response array
 		$response = [
@@ -238,7 +290,7 @@ END;
 		$response = 'Failed to generate a valid query.';
 
 		return $response;
-	}
+	} */
 
 
 	private function runQuery(string $query): string
@@ -262,8 +314,21 @@ END;
 	}
 
 
-	private function validateQuery(string $query): bool
+	private function debug($content)
 	{
+		if (! $content) {
+			return;
+		}
+
+		if ($this->router->isStreaming) {
+			$message = json_encode([
+				'status' => 'debug',
+				'content' => $content
+			]);
+
+			$this->router->sendStream(message: $message);
+
+		}
 
 		return true;
 	}
@@ -280,6 +345,18 @@ END;
 			$contentFile = file_get_contents($filename);
 
 			return $contentFile;
+		}
+
+		// or create new schema from database
+		if ($this->router->isStreaming) {
+			$message = json_encode([
+				'status' => 'working',
+				'role' => 'system',
+				'content' => '(Looking at schema...)',
+				'created' => time()
+			]);
+
+			$this->router->sendStream(message: $message);
 		}
 
 		$result = [];

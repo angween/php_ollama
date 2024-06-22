@@ -207,7 +207,7 @@ class Router {
 
 	public function sendStream(string $message, ?string $id = null)
 	{
-		if ( ! $id ) $id = uniqid();
+		if ( ! $id ) $id = microtime(true);
 
 		echo "id: $id\n";
 

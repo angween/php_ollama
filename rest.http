@@ -72,3 +72,8 @@ Accept: application/json
     }
   ]
 }
+
+
+###
+POST http://localhost/php_ollama/app/Router.php?llm=1&topic=database&path=ollama%2Fprompt&sessionId=new&prompt=who+are+five+our+top+buyer+customers+name HTTP/1.1
+Accept: text/event-stream

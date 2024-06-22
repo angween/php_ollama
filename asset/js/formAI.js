@@ -220,7 +220,8 @@ export class FormAI {
 			const content = response.content || null
 			const created = response.created || null
 
-			if (response.status == 'success') {
+			// AI is done generating answer
+			if (status == 'success') {
 				// hapus simulasi chat
 				let simulasiChat = document.getElementById('simulationChat')
 
@@ -234,50 +235,53 @@ export class FormAI {
 				// update conversation history panel
 				this.sessionHistoryAppend(response.sessionID, true, true)
 
+				// TODO - not all the responses format have been translated
+				console.log(response.content)
+
 				// create message
 				this.createMessage(response)
 				
 				// destroy SSE
 				this.simulationChatEvent.close()
+			
+			// Debuging report
+			} else if (status=='debug') {
+				console.log('DEBUG:', response)
+
+			// AI still working on answer
 			} else {
 				if (content) {
-					// create simulation message
-					this.simulationReplyShows(content, created)
+					// hapus simulasi chat
+					let simulasiChat = document.getElementById('simulationChat')
+
+					if (simulasiChat) {
+						simulasiChat.querySelector('.mf-content .information').innerHTML = content
+					} else {
+						// create simulation message
+						this.simulationReplyShows(content, created)
+					}
+
 				}
 			}
 		}
 
 		// on error
 		this.simulationChatEvent.onerror = () => {
-			console.error('EventSource failed.')
+			let simulasiChat = document.getElementById('simulationChat')
 
+			if (simulasiChat) {
+				simulasiChat.querySelector('.mf-content').innerHTML = "I can not get the answer. Please try again."
+			} else {
+				this.createMessage({
+					role: 'assistant',
+					content: "I can't get the answer. Please try again."
+				})
+			}
+
+			// destroy SSE
 			this.simulationChatEvent.close()
 		}
 
-		// this.ajax({
-		// 	url: 'app/Router.php',
-		// 	method: 'POST',
-		// 	data: formData,
-		// 	headers: {
-		// 		Accept: 'application/json'
-		// 	},
-		// 	success: (data) => {
-		// 		console.log(data) // TODO not all the response's format have been translated
-
-		// 		const sessionID = data['sessionID'] || null
-
-		// 		if (sessionID) {
-		// 			this.sessionIDset(sessionID)
-
-		// 			this.sessionHistoryAppend(sessionID, true, true)
-		// 		}
-
-		// 		this.createMessage(data)
-		// 	},
-		// 	error: (xhr) => {
-		// 		console.error('Error:', xhr)
-		// 	},
-		// })
 
 		// Clear prompt
 		this.prompt.value = ''
@@ -289,7 +293,7 @@ export class FormAI {
 
 		let simulationElement = `
 			<span class="spinner-grow spinner-grow-sm" style="height:12px;width:12px"></span>
-  			<span role="status" style="color: var(--bs-gray-300)">${content}</span>`
+  			<span role="status" class="information" style="color: var(--bs-gray-300)">${content}</span>`
 		
 		simulationChat = simulationChat.replace('#ID#', 'id="simulationChat"')
 		simulationChat = simulationChat.replace('##CONTENT##', simulationElement)

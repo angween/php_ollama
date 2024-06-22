@@ -37,9 +37,10 @@ class Ollama
 		private ?array $response = null,
 		private array $conversationHistory = [],
 		private array $post = [],
-		private string $sessionID = "",
+		public string $sessionID = "",
 		public string $prompt = "",
 		public string $llm = "",
+		public string $promptTopic = "",
 	) {
 		$this->controller = $controller;
 
@@ -53,7 +54,7 @@ class Ollama
 
 		$this->llm = $this->getLLM();
 		
-		$topic = $this->getTopic();
+		$this->promptTopic = $this->getTopic();
 
 		// get sessionId
 		$sessionID = $this->router->clientPost['sessionId'] ?? null;
@@ -76,7 +77,7 @@ class Ollama
 
 
 		// send chatData to Ollama
-		if ( $topic == 'general') {
+		if ( $this->promptTopic == 'general') {
 			// load or set new conversation
 			if ($sessionID == 'new') {
 				$conversationHistory = [
@@ -112,7 +113,7 @@ class Ollama
 			// ];
 		}
 
-		else if ($topic == 'database' ) {
+		else if ($this->promptTopic == 'database' ) {
 			$this->ollamaDB = new OllamaDB(
 				ollama: $this,
 				router: $this->router,
@@ -120,6 +121,19 @@ class Ollama
 			);
 
 			$this->response = $this->ollamaDB->promptDB(url: self::URL_CHAT);
+
+			$conversationHistory[] = $this->response; 
+
+			$chatData = $this->prepareChatData(
+				llm: $this->llm,
+				conversationHistory: $conversationHistory,
+				temperature: self::LLM_TEMPERATURE
+			);
+
+			$this->response = null;
+
+			// generate natural language for query
+			$this->response = $this->getResponOllama(url: self::URL_CHAT, chatData: $chatData);
 		}
 
 		// handle respon
@@ -342,14 +356,18 @@ class Ollama
 
 		// is it streaming?
 		if ( $this->router->isStreaming ) {
-			$message = json_encode([
-				'status' => 'working',
-				'role' => 'system',
-				'content' => 'Thinking...',
-				'created' => time()
-			]);
+			if ($this->promptTopic == 'general' ) {
+				$content = '(Typing...)';
 
-			$this->router->sendStream(message: $message);
+				$message = json_encode([
+					'status' => 'working',
+					'role' => 'system',
+					'content' => $content,
+					'created' => time()
+				]);
+
+				$this->router->sendStream(message: $message);
+			}
 		}
 
 		// Execute the cURL request
@@ -394,18 +412,19 @@ class Ollama
 
 		// Step 2: Extract email addresses, URLs, and numbers
 		$pattern = '/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})|((http|https):\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/[a-zA-Z0-9._%+-]*)?)|(\b\d+\b)/';
-		preg_match_all($pattern, $input, $matches);
+		preg_match_all($pattern, $input, $matches, PREG_OFFSET_CAPTURE);
 
-		// $matches[0] contains all matched emails, URLs, and numbers
+		// $matches[0] contains all matched emails, URLs, and numbers with their positions
 		$preservedElements = $matches[0];
 
 		// Step 3: Remove all special characters except spaces, preserved elements, and allowed punctuation
-		$sanitized = preg_replace($pattern, '', $input); // Remove preserved elements
+		$sanitized = preg_replace($pattern, ' ', $input); // Replace preserved elements with spaces
 		$sanitized = preg_replace('/[^a-zA-Z0-9\s!$?]/', '', $sanitized); // Remove special characters except allowed ones
 
-		// Step 4: Insert preserved elements back into the sanitized string
-		foreach ($preservedElements as $element) {
-			$sanitized .= ' ' . $element;
+		// Step 4: Insert preserved elements back into the sanitized string at their original positions
+		foreach (array_reverse($preservedElements) as $element) {
+			$position = $element[1];
+			$sanitized = substr_replace($sanitized, $element[0], $position, 0);
 		}
 
 		// Step 5: Trim and normalize spaces
