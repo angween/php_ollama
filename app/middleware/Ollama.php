@@ -12,6 +12,10 @@ defined('APP_NAME') or exit('No direct script access allowed');
 
 class Ollama
 {
+	public const DEBUG = true;
+
+	public const RESULT_MAX_ROWS = 5;
+
 	public const LLM = OLLAMA_MODEL ?? 'llama3';
 
 	private const LLM_MODELS = OLLAMA_MODEL_LIST ?? [];
@@ -35,7 +39,8 @@ class Ollama
 		private ?Router $router = null,
 		private ?OllamaDB $ollamaDB = null,
 		private ?array $response = null,
-		private array $conversationHistory = [],
+		public array $conversationFull = [],
+		public array $conversationToSave = [],
 		private array $post = [],
 		public string $sessionID = "",
 		public string $prompt = "",
@@ -67,7 +72,8 @@ class Ollama
 		];
 
 		// variable to collect all the new conversation to save
-		$conversationToSave = [];
+		$this->conversationToSave = [];
+		$this->conversationFull = [];
 
 
 		// is client expectiong SSE?
@@ -80,7 +86,7 @@ class Ollama
 		if ( $this->promptTopic == 'general') {
 			// load or set new conversation
 			if ($sessionID == 'new') {
-				$conversationHistory = [
+				$this->conversationToSave = [
 					[
 						"role" => "system",
 						"content" => self::SYSTEM_CONTENT_GENERAL,
@@ -88,74 +94,114 @@ class Ollama
 					]
 				];
 
-				$conversationToSave = $conversationHistory;
-			} else {
-				$conversationHistory = $this->loadConversation(filename: $sessionID);
-			}
+				$this->conversationToSave[] = $newPrompt;
 
-			// append new prompt
-			$conversationHistory[] = $newPrompt;
+				// append new prompt
+				$this->conversationFull = $this->conversationToSave;
+			} else {
+				$this->conversationFull = $this->loadConversation(filename: $sessionID);
+
+				$this->conversationToSave[] = $newPrompt;
+
+				$this->conversationFull[] = $newPrompt;
+			}
 
 			// prepare chatData
 			$chatData = $this->prepareChatData(
 				llm: $this->llm,
-				conversationHistory: $conversationHistory,
+				conversationHistory: $this->conversationFull,
 				temperature: self::LLM_TEMPERATURE
 			);
 
 			// get Ollama respon
 			$this->response = $this->getResponOllama(url: self::URL_CHAT, chatData: $chatData);
 
-			// debug Simulation Response -- REMOVE
+			// Simulation Response -- REMOVE
 			// $this->response = [
 			// 	"role" => "assistant",
 			// 	"content" => "It's-a me, Mario! Ahahahaha! Don't worry, I'm on it! That no-good Koopa King is always causing trouble!"
 			// ];
 		}
 
-		else if ($this->promptTopic == 'database' ) {
+		else if ( $this->promptTopic == 'database' ) {
+			if ($sessionID == 'new') {
+				$this->conversationToSave[] = $newPrompt;
+			} else {
+				$this->conversationFull = $this->loadConversation(filename: $sessionID);
+
+				$this->conversationToSave[] = $newPrompt;
+
+				$this->conversationFull[] = $newPrompt;
+			}
+
+			// generate SQL query dan get result 
 			$this->ollamaDB = new OllamaDB(
 				ollama: $this,
 				router: $this->router,
 				controller: $this->controller,
 			);
 
+			// get the Query result 
 			$this->response = $this->ollamaDB->promptDB(url: self::URL_CHAT);
 
-			$conversationHistory[] = $this->response; 
+			// add the working query to history
+			$this->conversationToSave[] = [
+				'role' => 'assistant',
+				'content' => $this->ollamaDB->workingQuery,
+				'created' => time()
+			];
 
-			$chatData = $this->prepareChatData(
-				llm: $this->llm,
-				conversationHistory: $conversationHistory,
-				temperature: self::LLM_TEMPERATURE
-			);
+			// $chatData = $this->prepareChatData(
+			// 	llm: $this->llm,
+			// 	conversationHistory: $this->conversationFull,
+			// 	temperature: self::LLM_TEMPERATURE
+			// );
 
-			$this->response = null;
-
-			// generate natural language for query
-			$this->response = $this->getResponOllama(url: self::URL_CHAT, chatData: $chatData);
+			
+			// generate natural language for final respon
+			// $this->response = null;
+			// $this->response = $this->getResponOllama(url: self::URL_CHAT, chatData: $chatData);
 		}
 
-		// handle respon
+		// nothing to response? report and exit
 		if (!$this->response) {
-			throw new \Exception("AI did not Response, make sure Ollama is running, and the selected model is exists!");
-		} else {
-			$this->response['status'] = 'success';
-			$this->response['created'] = time();
+			if ($this->router->isStreaming) {
+				$this->router->sendStream(message: json_encode([
+					"role" => "assistant",
+					"content" => "*Cannot get response from AI, make sure Ollama is running, and the selected model is exists."
+				]));
+
+				$this->router->endStreaming();
+			} else {
+				$this->controller->response([
+					"status" => "error",
+					"message" => "AI did not Response, make sure Ollama is running, and the selected model is exists!",
+				]);
+			}
 		}
 
-		// fill up new conversation data
-		$conversationToSave[] = $newPrompt;
-		$conversationToSave[] = $this->response;
+		// add timestamp
+		$this->response['created'] = time();
 
+		// add the querty result to append history file 
+		$this->conversationToSave[] = $this->response;
+
+
+		// also put in conversation history for the final response
+		foreach ($this->conversationToSave as $item) {
+			$this->conversationFull[] = $item;
+		}
 
 		// save conversation 
 		$this->saveConversation(
 			sessionID: $sessionID,
-			newPrompt: $conversationToSave,
+			newPrompt: $this->conversationToSave,
 		);
 
-		$this->response['sessionID'] = [
+		// preparing variable for reporting to front-end
+		$report = $this->response;
+
+		$report['sessionID'] = [
 			'id' => $this->sessionID,
 			'title' => $this->prompt,
 			'created' => time()
@@ -163,11 +209,11 @@ class Ollama
 
 		// return respon to Front End
 		if ($this->router->isStreaming ) {
-			$this->router->sendStream(message: json_encode($this->response));
+			$this->router->sendStream(message: json_encode($report));
 
 			$this->router->endStreaming();
 		} else {
-			$this->controller->response(message: $this->response);
+			$this->controller->response(message: $report);
 		}
 	}
 
@@ -383,8 +429,23 @@ class Ollama
 			throw new \Exception('Error: ' . $errorMessage);
 		} else {
 			$response = json_decode($response, true);
+			$LLManswer = null;
 
-			if (isset($response['response'])) {
+			if ( isset( $response['error'] ) ) {
+				if ( $this->router->isStreaming) {
+					$this->router->sendStream(
+						message: json_encode( $response ) 
+					);
+
+					$this->router->endStreaming();
+
+					exit;
+				} else {
+					throw new \Exception("Error: " . $response['error'] );					
+				}
+			}
+
+			elseif (isset($response['response'])) {
 				$LLManswer = $response['response'];
 			}
 
@@ -399,6 +460,10 @@ class Ollama
 			}
 
 			curl_close($ch);
+
+			if(! isset($LLManswer)) {
+				print_r($response);
+			}
 
 			return $LLManswer;
 		}

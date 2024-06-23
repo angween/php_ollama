@@ -23,6 +23,7 @@ Your task is to convert a question into a SQL query, given a MySQL database sche
 Adhere to these rules:
 - **Deliberately go through the question and database schema word by word** to appropriately answer the question
 - **Use Table Aliases** to prevent ambiguity. For example, `SELECT table1.col1, table2.col1 FROM table1 JOIN table2 ON table1.id = table2.id`.
+- Take conversation history above into account
 - When creating a ratio, always cast the numerator as float
 - Add limit in Query to 10 rows except if tells differently
 - No need to Reasoning
@@ -42,6 +43,7 @@ END;
 		private ?Ollama $ollama = null,
 		private ?Router $router = null,
 		private ?Controller $controller = null,
+		public ?string $workingQuery = null,
 	) {
 		$this->ollama = $ollama;
 		$this->router = $router;
@@ -63,13 +65,6 @@ END;
 		// get table schema
 		$schema = $this->getTableSchema();
 
-		// add schema to role
-		// $systemRole['content'] = str_replace('#SCHEMA#', $schema, $systemRole['content']);
-
-		// add user's prompt to the role
-		// $systemRole['content'] = str_replace('#QUESTION', $this->ollama->prompt, $systemRole['content']);
-		// $systemRole['content'] = addslashes( $systemRole['content'] );
-
 		// get query result from ollama
 		$resultQuery = $this->getQueryFromOllama(systemRole: $systemRole, schema: $schema);
 
@@ -89,7 +84,11 @@ END;
 				$this->router->sendStream(message: $message);
 
 				$this->router->endStreaming();
+			} else {
+				throw new \Exception("Sorry, cannot find any result!");
 			}
+		} elseif ( count( $resultQuery ) > $this->ollama::RESULT_MAX_ROWS ) {
+			array_splice( $resultQuery, 0, $this->ollama::RESULT_MAX_ROWS);
 		}
 
 		// update progress
@@ -112,19 +111,28 @@ END;
 		$prompt = $this->ollama->prompt;
 
 		$content = <<<END
-"Based on the following SQL Query result, answer the user question using natural language.
+Based on the following SQL Query result, answer the user question using natural language with the same language the user use.
 
-Question: `".$prompt."`
+Question: `$prompt`
 
 Query Result: `$jsonResult`
-"
 END;
 
-		return [
+		$conversationDB[] = [
 			"role" => "system",
 			"content" => $content,
 			"created" => time()
 		];
+
+		$chatData = $this->ollama->prepareChatData(
+			llm: $this->ollama->llm,
+			conversationHistory: $conversationDB,
+			temperature: $this->ollama::LLM_TEMPERATURE
+		);
+
+		$response = $this->ollama->getResponOllama(url: $this->ollama::URL_CHAT, chatData: $chatData);
+
+		return $response;
 	}
 
 
@@ -135,21 +143,7 @@ END;
 		// message to Ollama if the query return error result
 		$errorResult = '';
 		$progress = '';
-
-		/* 
-				$conversationGenerate = [
-					"model" => $this->ollama->llm,
-					"prompt" => $systemRole['content'],
-					"stream" => false,
-					"temperature" => 0
-				];
-			*/
-
-		/* Questions example:
-				  what are our tables name
-				  what are our best seller product
-			  */
-
+		$conversationChat = []; 	// local varible for geting the right query 
 
 		for ($i = 0; $i <= self::MAX_LOOP; $i++) {
 			if ( $errorResult != '' ) {
@@ -170,18 +164,32 @@ END;
 				$systemContent = str_replace('{question}', $this->ollama->prompt, $systemContent);
 				$progress = '(#1: Querying database...)';
 
+				$initialChat = [
+					"role" => "system",
+					"content" => $systemContent
+				];
+
+				// if this is a saved conversation - load previous chat
+				if ($this->ollama->sessionID == 'new') {
+					$content = $initialChat;
+				} else {
+					$content = [];
+
+					$content[] = $initialChat;
+
+					foreach ($this->ollama->conversationFull as $value) {
+						$content[] = $value;
+					}
+				}
+
+				// preparing parameter to Ollama
 				$conversationChat = [
 					"model" => $this->ollama->llm,
 					"stream" => false,
 					"options" => [
 						"temperature" => 0
 					],
-					"messages" => [
-						[
-							"role" => "system",
-							"content" => $systemContent
-						]
-					]
+					"messages" => $content
 				];
 
 				$this->debug(content: str_replace('{question}', $this->ollama->prompt, self::SYSTEM_CONTENT));
@@ -199,11 +207,16 @@ END;
 				$this->router->sendStream(message: $message);
 			}
 
+			print_r($conversationChat);
+
 			// send to Ollama
 			$responseAI = $this->ollama->getResponOllama(
 				url: $this->ollama::URL_CHAT,
 				chatData: $conversationChat
 			);
+
+			// report the response to front-end debuging
+			$this->debug(content: $responseAI['content']);
 
 			// get only the SQL Query from the response
 			$sqlQuery = $this->extractSQLquery(responseOllama: $responseAI['content']);
@@ -224,7 +237,6 @@ END;
 				'content' => $responseAI['content']
 			];
 
-
 			// return respon
 			if ( $resultQuery['status'] == 'error') {
 				$errorResult = $resultQuery['message'];
@@ -234,6 +246,8 @@ END;
 				} else {
 					$respon = $resultQuery['data'];
 				}
+
+				$this->workingQuery = $sqlQuery;
 
 				return $respon;
 			}
@@ -316,6 +330,10 @@ END;
 
 	private function debug($content)
 	{
+		if ( $this->ollama::DEBUG == false ) {
+			return;
+		}
+
 		if (! $content) {
 			return;
 		}
@@ -327,7 +345,6 @@ END;
 			]);
 
 			$this->router->sendStream(message: $message);
-
 		}
 
 		return true;
@@ -383,34 +400,6 @@ END;
 			$result[] = preg_replace('/\s+/', ' ', $_showCreate);
 		}
 
-		// or create new schema from database
-		// $queries = [
-		// 	'table_names' => "SELECT table_name FROM information_schema.tables WHERE table_schema = '" . DB_NAME . "'",
-
-		// 	'table_names_and_column' => "SELECT table_name, column_name, data_type, column_key, 
-		// 		is_nullable /* , column_default */ FROM information_schema.columns 
-		// 		WHERE table_schema = '" . DB_NAME . "' ORDER BY table_name, ordinal_position",
-
-		// 	'primary_keys' => "SELECT table_name, column_name 
-		// 		FROM information_schema.key_column_usage 
-		// 		WHERE table_schema = '" . DB_NAME . "' AND constraint_name = 'PRIMARY'",
-
-		// 	'foreign_keys' => "SELECT table_name, column_name, referenced_table_name, referenced_column_name
-		// 		FROM information_schema.key_column_usage
-		// 		WHERE table_schema = '" . DB_NAME . "'
-		// 		AND referenced_table_name IS NOT NULL",
-
-		// 	'indexes' => "SELECT table_name, index_name, column_name, non_unique
-		// 		FROM information_schema.statistics
-		// 		WHERE table_schema = '" . DB_NAME . "'
-		// 		ORDER BY table_name, index_name, seq_in_index",
-		// ];
-
-		
-		// foreach ($queries as $key => $query) {
-		// 	$result[$key] = $this->executeQueryToJson(query: $query, key: $key);
-		// }
-		
 		if ($result) {
 			// format as txt
 			$saveResult = implode(";\n\n", array_values( $result) );

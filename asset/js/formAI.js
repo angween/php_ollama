@@ -374,10 +374,12 @@ export class FormAI {
 
 
 	formatMessage = (message) => {
+		message = message.replaceAll('\n\t*', '<br/><span class="ps-2 pe-1">*</span>')
+		message = message.replaceAll('\n\n', '<br/><br/>')
 		message = message.replaceAll('\n', '<br/>')
 
 		// for **??**
-		message = message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+		message = message.replace(/\*\*(.*?)\*\*/g, '<strong class="pt-2">$1</strong>');
 
 		// for *??*
 		// message = message.replace(/\*(.*?)\*/g, '<strong>$1</strong>');

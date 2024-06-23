@@ -73,7 +73,23 @@ Accept: application/json
   ]
 }
 
-
-###
-POST http://localhost/php_ollama/app/Router.php?llm=1&topic=database&path=ollama%2Fprompt&sessionId=new&prompt=who+are+five+our+top+buyer+customers+name HTTP/1.1
+### WEB SIMULATION DATABASE - new session
+POST http://localhost/php_ollama/app/Router.php?llm=1&topic=database&path=ollama%2Fprompt&sessionId=new&prompt=di+kota+apa+konsumen+kita+paling+banyak+tinggal HTTP/1.1
 Accept: text/event-stream
+
+### WEB SIMULATION DATABASE - load session
+POST http://localhost/php_ollama/app/Router.php?llm=0&topic=database&path=ollama%2Fprompt&sessionId=2406230538_6677526ee5085&prompt=apa+kita+memiliki+kantor+di+kota+itu HTTP/1.1
+Accept: text/event-stream
+
+### WEB SIMULATION GENERAL CHAT - new session
+POST http://localhost/php_ollama/app/Router.php HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "llm": 0,
+  "topic": "general",
+  "path": "ollama/prompt",
+  "sessionId": "2406180457_66715a1947958",
+  "prompt": "Kenapa putri selalu diculik"
+}

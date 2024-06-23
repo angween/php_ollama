@@ -159,11 +159,11 @@ $greetingMessage = CHAT_GREETING;
 
 						<div class="col-xl-10">
 							<input type="radio" class="btn-check" value="database" name="topic" form="frmPrompt"
-								id="database" autocomplete="off">
+								id="database" autocomplete="off" checked>
 							<label class="btn" for="database">Database</label>
 
 							<input type="radio" class="btn-check" value="general" name="topic" form="frmPrompt"
-								id="general" autocomplete="off" checked>
+								id="general" autocomplete="off">
 							<label class="btn" for="general">General Question</label>
 						</div>
 					</div>
