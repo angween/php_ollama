@@ -17,7 +17,7 @@ class OllamaDB
 
 	private ?Database $db = null;
 
-	private const SYSTEM_CONTENT = <<<END
+	private const SYSTEM_CONTENTOLD = <<<END
 ### Instructions:
 Your task is to convert a question into a SQL query, given a MySQL database schema.
 Adhere to these rules:
@@ -37,6 +37,19 @@ This query will run on a database whose schema is represented in this string:
 ### Response:
 Based on your instructions, here is the SQL query I have generated to answer the question `{question}`:
 ```sql
+END;
+	
+private const SYSTEM_CONTENT = <<<END
+### Task
+Generate a SQL query to answer [QUESTION]{question}[/QUESTION]
+
+### Database Schema
+The query will run on a database with the following schema:
+{SCHEMA}
+
+
+### Answer
+Given the database schema, {question}
 END;
 
 	public function __construct(
@@ -207,8 +220,6 @@ END;
 				$this->router->sendStream(message: $message);
 			}
 
-			print_r($conversationChat);
-
 			// send to Ollama
 			$responseAI = $this->ollama->getResponOllama(
 				url: $this->ollama::URL_CHAT,
@@ -216,7 +227,7 @@ END;
 			);
 
 			// report the response to front-end debuging
-			$this->debug(content: $responseAI['content']);
+			$this->debug(content: $responseAI);
 
 			// get only the SQL Query from the response
 			$sqlQuery = $this->extractSQLquery(responseOllama: $responseAI['content']);

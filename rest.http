@@ -18,7 +18,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "model": "qwen2",
+  "model": "sqlcoder",
   "options": {
     "temperature": 0
   },
@@ -32,7 +32,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "model": "llama3",
+  "model": "sqlcoder",
   "stream": false,
   "options": {
     "temperature": 0
@@ -74,7 +74,7 @@ Accept: application/json
 }
 
 ### WEB SIMULATION DATABASE - new session
-POST http://localhost/php_ollama/app/Router.php?llm=1&topic=database&path=ollama%2Fprompt&sessionId=new&prompt=di+kota+apa+konsumen+kita+paling+banyak+tinggal HTTP/1.1
+POST http://localhost/php_ollama/app/Router.php?llm=1&topic=database&path=ollama%2Fprompt&sessionId=new&prompt=tell+me+what+is+our+best+seller+product? HTTP/1.1
 Accept: text/event-stream
 
 ### WEB SIMULATION DATABASE - load session
