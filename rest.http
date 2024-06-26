@@ -78,7 +78,7 @@ POST http://localhost/php_ollama/app/Router.php?llm=1&topic=database&path=ollama
 Accept: text/event-stream
 
 ### WEB SIMULATION DATABASE - load session
-POST http://localhost/php_ollama/app/Router.php?llm=0&topic=database&path=ollama%2Fprompt&sessionId=2406230538_6677526ee5085&prompt=apa+kita+memiliki+kantor+di+kota+itu HTTP/1.1
+POST http://localhost/php_ollama/app/Router.php?llm=1&topic=database&path=ollama%2Fprompt&sessionId=2406240942_6678dd10ee0b0&prompt=is+our+office+exists+in+that+city? HTTP/1.1
 Accept: text/event-stream
 
 ### WEB SIMULATION GENERAL CHAT - new session
