@@ -148,7 +148,8 @@ class Ollama
 			$this->conversationToSave[] = [
 				'role' => 'assistant',
 				'content' => $this->ollamaDB->workingQuery,
-				'created' => time()
+				'created' => time(),
+				'hide' => true,
 			];
 
 			// $chatData = $this->prepareChatData(
@@ -200,6 +201,8 @@ class Ollama
 
 		// preparing variable for reporting to front-end
 		$report = $this->response;
+
+		$report['status'] = 'success';
 
 		$report['sessionID'] = [
 			'id' => $this->sessionID,

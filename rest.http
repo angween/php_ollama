@@ -74,11 +74,11 @@ Accept: application/json
 }
 
 ### WEB SIMULATION DATABASE - new session
-POST http://localhost/php_ollama/app/Router.php?llm=1&topic=database&path=ollama%2Fprompt&sessionId=new&prompt=tell+me+what+is+our+best+seller+product? HTTP/1.1
+POST http://localhost/php_ollama/app/Router.php?llm=1&topic=database&path=ollama%2Fprompt&sessionId=new&prompt=apa+produk+kita+yang+paling+laris? HTTP/1.1
 Accept: text/event-stream
 
 ### WEB SIMULATION DATABASE - load session
-POST http://localhost/php_ollama/app/Router.php?llm=0&topic=database&path=ollama%2Fprompt&sessionId=2406230538_6677526ee5085&prompt=apa+kita+memiliki+kantor+di+kota+itu HTTP/1.1
+POST http://localhost/php_ollama/app/Router.php?llm=0&topic=database&path=ollama%2Fprompt&sessionId=2406230618_6678048fe2dfe&prompt=apa+kita+memiliki+kantor+di+kota+itu HTTP/1.1
 Accept: text/event-stream
 
 ### WEB SIMULATION GENERAL CHAT - new session

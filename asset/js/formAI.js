@@ -306,6 +306,8 @@ export class FormAI {
 
 
 	sessionIDset = (sessionID) => {
+		if ( typeof(sessionID['id'] ) == 'undefined') return 
+		
 		this.sessionName.value = sessionID['id']
 	}
 
@@ -354,6 +356,13 @@ export class FormAI {
 
 		if (data['status'] && data['status'] == 'error') {
 			alert(data['message'])
+
+			return
+		}
+
+		// hide the message?
+		if (data['hide']) {
+			console.log(`*** SQL Query: ${data['content']}`)
 
 			return
 		}
