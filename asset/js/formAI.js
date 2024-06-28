@@ -255,8 +255,10 @@ export class FormAI {
 					let simulasiChat = document.getElementById('simulationChat')
 
 					if (simulasiChat) {
+						console.log('update')
 						simulasiChat.querySelector('.mf-content .information').innerHTML = content
 					} else {
+						console.log('buat baru')
 						// create simulation message
 						this.simulationReplyShows(content, created)
 					}

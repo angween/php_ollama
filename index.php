@@ -146,9 +146,10 @@ $greetingMessage = CHAT_GREETING;
 						<div class="col-lg-10">
 							<select id="llm" name="llm" form="frmPrompt" class="form-select">
 								<option value="0" selected>Llama3</option>
-								<option value="1">Qwen2</option>
-								<option value="2">DuckDB-nsql</option>
-								<option value="3">SQLcoder</option>
+								<option value="1">Gemma2</option>
+								<option value="2">Qwen2</option>
+								<option value="3">DuckDB-nsql</option>
+								<option value="4">SQLcoder</option>
 							</select>
 						</div>
 					</div>

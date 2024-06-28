@@ -39,17 +39,19 @@ Based on your instructions, here is the SQL query I have generated to answer the
 ```sql
 END;
 	
-private const SYSTEM_CONTENT = <<<END
+	private const SYSTEM_CONTENT = <<<END
 ### Task
-Generate a SQL query to answer [QUESTION]{question}[/QUESTION]
+Generate a MySQL SQL query to answer [QUESTION]{question}[/QUESTION].
+If you think the question is not Database related or you want to stright give the answer, please respon started with '### Result:'.
 
 ### Database Schema
 The query will run on a database with the following schema:
+
 {SCHEMA}
 
 
 ### Answer
-Given the database schema, {question}
+Given the database schema, '{question}'
 END;
 
 	public function __construct(
@@ -70,10 +72,7 @@ END;
 		string $url,
 	): array {
 		// get system prompt for database
-		$systemRole = [
-			'role' => 'system',
-			'content' => CHAT_SYSTEM_DB
-		];
+		$systemRole = CHAT_SYSTEM_DB;
 
 		// get table schema
 		$schema = $this->getTableSchema();
@@ -150,7 +149,7 @@ END;
 
 
 	private function getQueryFromOllama(
-		array $systemRole,
+		string $systemRole,
 		string $schema
 	){
 		// message to Ollama if the query return error result
@@ -171,15 +170,15 @@ END;
 
 				$errorResult = '';
 			} else {
-				// conversation based on the URL type
-				$systemContent = self::SYSTEM_CONTENT;
-				$systemContent = str_replace('{SCHEMA}', $schema, $systemContent);
-				$systemContent = str_replace('{question}', $this->ollama->prompt, $systemContent);
+				/* Disable this if want to use .env SYSTEM_DB */
+				$systemRole = self::SYSTEM_CONTENT;
+				$systemRole = str_replace('{SCHEMA}', $schema, $systemRole);
+				$systemRole = str_replace('{question}', $this->ollama->prompt, $systemRole);
 				$progress = '(#1: Querying database...)';
 
 				$initialChat = [
 					"role" => "system",
-					"content" => $systemContent
+					"content" => $systemRole
 				];
 
 				// if this is a saved conversation - load previous chat
@@ -205,7 +204,8 @@ END;
 					"messages" => $content
 				];
 
-				$this->debug(content: str_replace('{question}', $this->ollama->prompt, self::SYSTEM_CONTENT));
+				$this->debug(content: $systemRole);
+				// $this->debug(content: str_replace('{question}', $this->ollama->prompt, self::SYSTEM_CONTENT));
 			}
 
 			// report progress if isStreaming
@@ -385,6 +385,9 @@ END;
 			]);
 
 			$this->router->sendStream(message: $message);
+
+			// give delay for showing the 'content' message
+			sleep(1);
 		}
 
 		$result = [];
