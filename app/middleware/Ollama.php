@@ -12,6 +12,8 @@ defined('APP_NAME') or exit('No direct script access allowed');
 
 class Ollama
 {
+	private const URL_OLLAMA = 'http://localhost:11434';
+
 	public const DEBUG = true;
 
 	public const RESULT_MAX_ROWS = 5;
@@ -24,9 +26,9 @@ class Ollama
 
 	private const LLM_TOPIC = ['database', 'general'];
 
-	public const URL_GENERATE = OLLAMA_GENERATE ?? 'http://localhost:11434/api/generate';
+	public const URL_GENERATE = OLLAMA_GENERATE ?? self::URL_OLLAMA . "/api/generate";
 
-	public const URL_CHAT = OLLAMA_CHAT ?? 'http://localhost:11434/api/chat';
+	public const URL_CHAT = OLLAMA_CHAT ?? self::URL_OLLAMA . '/api/chat';
 
 	public const SYSTEM_CONTENT_GENERAL = CHAT_SYSTEM ?? "You are an helpfull assistant, answer the user's question with the same language given.";
 
@@ -388,6 +390,51 @@ class Ollama
 	}
 
 
+	public function getLLMList(){
+		$url = 'http://localhost:11434/api/tags';
+		$ch = curl_init();
+		$llmList = [];
+		$status = 'success';
+
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+		$response = curl_exec($ch);
+
+		if (curl_errno($ch)) {
+			$errorMessage = curl_error($ch);
+
+			curl_close($ch);
+
+			throw new \Exception("Error: $errorMessage");
+		} else {
+			$response = json_decode($response, true);
+
+			foreach ($response['models'] as $model) {
+				$nameParts = explode(':', $model['name']);
+				$baseName = $nameParts[0];
+
+				if (!in_array($baseName, $llmList)) {
+					$llmList[] = $baseName;
+				}
+			}
+
+			if (empty($llmList)) {
+				$status = 'failed';
+			}
+		}
+
+		curl_close($ch);
+
+		$report = [
+			'status' => $status,
+			'data' => $llmList,
+		];
+
+		$this->controller->response(message: $report);
+	}
+
+
 	public function getResponOllama(string $url, array $chatData)
 	{
 		$ch = curl_init();
@@ -537,6 +584,7 @@ class Ollama
 
 		return $prompt;
 	}
+
 
 	private function getLLM() :string 
 	{
