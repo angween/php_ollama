@@ -86,84 +86,11 @@ class Ollama
 
 		// send chatData to Ollama
 		if ( $this->promptTopic == 'general') {
-			// load or set new conversation
-			if ($sessionID == 'new') {
-				$this->conversationToSave = [
-					[
-						"role" => "system",
-						"content" => self::SYSTEM_CONTENT_GENERAL,
-						"created" => time()
-					]
-				];
-
-				$this->conversationToSave[] = $newPrompt;
-
-				// append new prompt
-				$this->conversationFull = $this->conversationToSave;
-			} else {
-				$this->conversationFull = $this->loadConversation(filename: $sessionID);
-
-				$this->conversationToSave[] = $newPrompt;
-
-				$this->conversationFull[] = $newPrompt;
-			}
-
-			// prepare chatData
-			$chatData = $this->prepareChatData(
-				llm: $this->llm,
-				conversationHistory: $this->conversationFull,
-				temperature: self::LLM_TEMPERATURE
-			);
-
-			// get Ollama respon
-			$this->response = $this->getResponOllama(url: self::URL_CHAT, chatData: $chatData);
-
-			// Simulation Response -- REMOVE
-			// $this->response = [
-			// 	"role" => "assistant",
-			// 	"content" => "It's-a me, Mario! Ahahahaha! Don't worry, I'm on it! That no-good Koopa King is always causing trouble!"
-			// ];
+			$this->promptGeneral(newPrompt: $newPrompt, sessionID: $sessionID);
 		}
 
 		else if ( $this->promptTopic == 'database' ) {
-			if ($sessionID == 'new') {
-				$this->conversationToSave[] = $newPrompt;
-			} else {
-				$this->conversationFull = $this->loadConversation(filename: $sessionID);
-
-				$this->conversationToSave[] = $newPrompt;
-
-				$this->conversationFull[] = $newPrompt;
-			}
-
-			// generate SQL query dan get result 
-			$this->ollamaDB = new OllamaDB(
-				ollama: $this,
-				router: $this->router,
-				controller: $this->controller,
-			);
-
-			// get the Query result 
-			$this->response = $this->ollamaDB->promptDB(url: self::URL_CHAT);
-
-			// add the working query to history
-			$this->conversationToSave[] = [
-				'role' => 'assistant',
-				'content' => $this->ollamaDB->workingQuery,
-				'created' => time(),
-				'hide' => true,
-			];
-
-			// $chatData = $this->prepareChatData(
-			// 	llm: $this->llm,
-			// 	conversationHistory: $this->conversationFull,
-			// 	temperature: self::LLM_TEMPERATURE
-			// );
-
-			
-			// generate natural language for final respon
-			// $this->response = null;
-			// $this->response = $this->getResponOllama(url: self::URL_CHAT, chatData: $chatData);
+			$this->promptDatabase(newPrompt: $newPrompt, sessionID: $sessionID);
 		}
 
 		// nothing to response? report and exit
@@ -220,6 +147,89 @@ class Ollama
 		} else {
 			$this->controller->response(message: $report);
 		}
+	}
+
+
+	private function promptDatabase(array $newPrompt, string $sessionID) {
+		if ($sessionID == 'new') {
+			$this->conversationToSave[] = $newPrompt;
+		} else {
+			$this->conversationFull = $this->loadConversation(filename: $sessionID);
+
+			$this->conversationToSave[] = $newPrompt;
+
+			$this->conversationFull[] = $newPrompt;
+		}
+
+		// generate SQL query dan get result 
+		$this->ollamaDB = new OllamaDB(
+			ollama: $this,
+			router: $this->router,
+			controller: $this->controller,
+		);
+
+		// get the Query result 
+		$this->response = $this->ollamaDB->promptDB();
+
+		// add the working query to history
+		$this->conversationToSave[] = [
+			'role' => 'assistant',
+			'content' => $this->ollamaDB->workingQuery,
+			'created' => time(),
+			'hide' => true,
+		];
+
+		// $chatData = $this->prepareChatData(
+		// 	llm: $this->llm,
+		// 	conversationHistory: $this->conversationFull,
+		// 	temperature: self::LLM_TEMPERATURE
+		// );
+
+
+		// generate natural language for final respon
+		// $this->response = null;
+		// $this->response = $this->getResponOllama(url: self::URL_CHAT, chatData: $chatData);
+	}
+
+
+	private function promptGeneral(array $newPrompt = null, string $sessionID = null) {
+		// load or set new conversation
+		if ($sessionID == 'new') {
+			$this->conversationToSave = [
+				[
+					"role" => "system",
+					"content" => self::SYSTEM_CONTENT_GENERAL,
+					"created" => time()
+				]
+			];
+
+			$this->conversationToSave[] = $newPrompt;
+
+			// append new prompt
+			$this->conversationFull = $this->conversationToSave;
+		} else {
+			$this->conversationFull = $this->loadConversation(filename: $sessionID);
+
+			$this->conversationToSave[] = $newPrompt;
+
+			$this->conversationFull[] = $newPrompt;
+		}
+
+		// prepare chatData
+		$chatData = $this->prepareChatData(
+			llm: $this->llm,
+			conversationHistory: $this->conversationFull,
+			temperature: self::LLM_TEMPERATURE
+		);
+
+		// get Ollama respon
+		$this->response = $this->getResponOllama(url: self::URL_CHAT, chatData: $chatData);
+
+		// Simulation Response -- REMOVE
+		// $this->response = [
+		// 	"role" => "assistant",
+		// 	"content" => "It's-a me, Mario! Ahahahaha! Don't worry, I'm on it! That no-good Koopa King is always causing trouble!"
+		// ];
 	}
 
 
@@ -468,7 +478,6 @@ class Ollama
 
 		// Execute the cURL request
 		$response = curl_exec($ch);
-
 
 		// Check for errors
 		if (curl_errno($ch)) {

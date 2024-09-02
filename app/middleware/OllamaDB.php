@@ -18,9 +18,9 @@ class OllamaDB
 	private ?Database $db = null;
 
 	private const SYSTEM_CONTENTOLD = <<<END
-### Instructions:
-Your task is to convert a question into a SQL query, given a MySQL database schema.
-Adhere to these rules:
+### Petunjuk:
+Tugas kamu adalah untuk mengonversi pertanyaan ke query SQL, berdasarkan database schema.
+Dengan petunjuk sebagai berikut:
 - **Deliberately go through the question and database schema word by word** to appropriately answer the question
 - **Use Table Aliases** to prevent ambiguity. For example, `SELECT table1.col1, table2.col1 FROM table1 JOIN table2 ON table1.id = table2.id`.
 - Take message chat history into account
@@ -41,17 +41,17 @@ END;
 	
 	private const SYSTEM_CONTENT = <<<END
 ### Task
-Generate a MySQL SQL query to answer [QUESTION]{question}[/QUESTION].
-If you think the question is not Database related or you want to stright give the answer, please respon started with '### Result:'.
+Buatkan query SQL untuk mencari jawaban di database MySQL dari pertanyaan user: [QUESTION]{question}[/QUESTION]
+Jika menurutmu pertanyaan ini tidak ada hubungannya dengan Database atau anda ingin memberikan jawaban langsung, silahkan respon dimulai dengan '### Result:'.
 
 ### Database Schema
-The query will run on a database with the following schema:
+Berikut schema dari database MySQL yang akan kamu butuhkan
 
 {SCHEMA}
 
 
 ### Answer
-Given the database schema, '{question}'
+Berdasarkan schema di atas anda harus membuat query SQL yang akan menjalankan pada database MySQL, '{question}'
 END;
 
 	public function __construct(
@@ -68,9 +68,7 @@ END;
 	}
 
 
-	public function promptDB(
-		string $url,
-	): array {
+	public function promptDB(): array {
 		// get system prompt for database
 		$systemRole = CHAT_SYSTEM_DB;
 
@@ -83,7 +81,7 @@ END;
 		// if result is empty
 		if (empty($resultQuery)) {
 			if ($this->router->isStreaming) {
-				$content = "I'm sorry, I cannot find any result, please try again.";
+				$content = "Maaf saya belum bisa menemukan jawabannya, silahkan dicoba lagi.";
 
 				$message = json_encode([
 					'status' => 'success',
