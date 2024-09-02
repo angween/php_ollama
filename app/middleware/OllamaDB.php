@@ -17,7 +17,7 @@ class OllamaDB
 
 	private ?Database $db = null;
 
-	private const SYSTEM_CONTENTOLD = <<<END
+	private const SYSTEM_CONTENTo = <<<END
 ### Instructions:
 Your task is to convert a question into a SQL query, given a MySQL database schema.
 Adhere to these rules:
@@ -44,14 +44,12 @@ END;
 Generate a MySQL SQL query to answer [QUESTION]{question}[/QUESTION].
 If you think the question is not Database related or you want to stright give the answer, please respon started with '### Result:'.
 
-### Database Schema
+### Database Schema:
 The query will run on a database with the following schema:
 
 {SCHEMA}
 
-
-### Answer
-Given the database schema, '{question}'
+### Answer:
 END;
 
 	public function __construct(
@@ -172,8 +170,10 @@ END;
 			} else {
 				/* Disable this if want to use .env SYSTEM_DB */
 				$systemRole = self::SYSTEM_CONTENT;
+				/* ------------------------------------------ */
 				$systemRole = str_replace('{SCHEMA}', $schema, $systemRole);
 				$systemRole = str_replace('{question}', $this->ollama->prompt, $systemRole);
+
 				$progress = '(#1: Querying database...)';
 
 				$initialChat = [
@@ -183,8 +183,10 @@ END;
 
 				// if this is a saved conversation - load previous chat
 				if ($this->ollama->sessionID == 'new') {
+					echo "NEW";
 					$content = $initialChat;
 				} else {
+					echo "NONEW";
 					$content = [];
 
 					$content[] = $initialChat;
@@ -193,6 +195,9 @@ END;
 						$content[] = $value;
 					}
 				}
+
+				// print_r($content);
+				// exit;
 
 				// preparing parameter to Ollama
 				$conversationChat = [
@@ -219,6 +224,8 @@ END;
 
 				$this->router->sendStream(message: $message);
 			}
+
+			// print_r($conversationChat);
 
 			// send to Ollama
 			$responseAI = $this->ollama->getResponOllama(
