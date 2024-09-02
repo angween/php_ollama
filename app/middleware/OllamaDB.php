@@ -41,8 +41,8 @@ END;
 	
 	private const SYSTEM_CONTENT = <<<END
 ### Task
-Generate a MySQL SQL query to answer [QUESTION]{question}[/QUESTION].
-If you think the question is not Database related or you want to stright give the answer, please respon started with '### Result:'.
+Buatkan query SQL untuk mencari jawaban di database MySQL dari pertanyaan user: [QUESTION]{question}[/QUESTION]
+Jika menurutmu pertanyaan ini tidak ada hubungannya dengan Database atau anda ingin memberikan jawaban langsung, silahkan respon dimulai dengan '### Result:'.
 
 ### Database Schema:
 The query will run on a database with the following schema:
@@ -66,9 +66,7 @@ END;
 	}
 
 
-	public function promptDB(
-		string $url,
-	): array {
+	public function promptDB(): array {
 		// get system prompt for database
 		$systemRole = CHAT_SYSTEM_DB;
 
@@ -81,7 +79,7 @@ END;
 		// if result is empty
 		if (empty($resultQuery)) {
 			if ($this->router->isStreaming) {
-				$content = "I'm sorry, I cannot find any result, please try again.";
+				$content = "Maaf saya belum bisa menemukan jawabannya, silahkan dicoba lagi.";
 
 				$message = json_encode([
 					'status' => 'success',

@@ -145,7 +145,7 @@ $greetingMessage = CHAT_GREETING;
 
 						<div class="col-lg-10">
 							<select id="llm" name="llm" form="frmPrompt" class="form-select">
-								<option value="0" selected>Llama3</option>
+								<option value="0" selected>Llama3.1</option>
 								<option value="1">Gemma2</option>
 								<option value="2">Qwen2</option>
 								<option value="3">DuckDB-nsql</option>
@@ -205,6 +205,5 @@ $greetingMessage = CHAT_GREETING;
 		})
 	</script>
 </body>
-
 
 </html>

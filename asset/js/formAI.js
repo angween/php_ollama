@@ -2,6 +2,9 @@ export class FormAI {
 	constructor(parameter) {
 		this.initVariables(parameter)
 
+		// llms list
+		this.initLLMList()
+
 		// chat form
 		this.initForm()
 
@@ -20,10 +23,11 @@ export class FormAI {
 
 
 	initVariables = (parameter) => {
-		this.form = document.getElementById(parameter.frmElement)
+		this.form = document.getElementById('frmPrompt')
 		this.sessionName = this.form.querySelector('input[name="sessionId"]')
 		this.prompt = this.form.querySelector('textarea')
 		this.loader = document.getElementById('loader')
+		this.llmSelect = document.getElementById('llm')
 	
 		this.conversation = document.getElementById('conversation')
 		this.scrollButton = document.getElementById('scrollButton')
@@ -35,6 +39,23 @@ export class FormAI {
 		this.btnConversationDelete = document.getElementById('btnConversationDelete')
 
 		this.greetingMessage = parameter.greetingMessage
+	}
+
+
+	initLLMList = () => {
+		this.ajax({
+			url: 'app/Router.php',
+			method: 'POST',
+			data: {
+				path: 'ollama/getLLMList',
+			},
+			success: (respon) => {
+				if (respon.status != 'success') {
+					alert(respon.message)
+				}
+
+			}
+		})
 	}
 
 
@@ -176,7 +197,6 @@ export class FormAI {
 					this.sessionIDset({id:dataId})
 				}
 			})
-
 		})
 	}
 
@@ -385,6 +405,8 @@ export class FormAI {
 
 
 	formatMessage = (message) => {
+		if ( ! message ) return ''
+
 		message = message.replaceAll('\n\t*', '<br/><span class="ps-2 pe-1">*</span>')
 		message = message.replaceAll('\n\n', '<br/><br/>')
 		message = message.replaceAll('\n', '<br/>')
