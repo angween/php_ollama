@@ -15,9 +15,11 @@ class OllamaDB
 
 	private const SCHEMA_PATH = "schema/";
 
+	private const MAX_QUERY_RESULT = 50;
+
 	private ?Database $db = null;
 
-	private const SYSTEM_CONTENTo = <<<END
+	private const SYSTEM_CONTENT9 = <<<END
 ### Instructions:
 Your task is to convert a question into a SQL query, given a MySQL database schema.
 Adhere to these rules:
@@ -33,19 +35,28 @@ Generate a SQL query that answers the question `{question}`.
 This query will run on a database whose schema is represented in this string:
 
 {SCHEMA}
-
-### Response:
-Based on your instructions, here is the SQL query I have generated to answer the question `{question}`:
-```sql
 END;
 	
-	private const SYSTEM_CONTENT = <<<END
+	private const SYSTEM_CONTENT1 = <<<END
 ### Task
 Buatkan query SQL untuk mencari jawaban di database MySQL dari pertanyaan user: [QUESTION]{question}[/QUESTION]
 Jika menurutmu pertanyaan ini tidak ada hubungannya dengan Database atau anda ingin memberikan jawaban langsung, silahkan respon dimulai dengan '### Result:'.
 
 ### Database Schema:
 The query will run on a database with the following schema:
+
+{SCHEMA}
+
+### Answer:
+END;
+
+	private const SYSTEM_CONTENT = <<<END
+### Task
+You are Data Analyst from a corporation and Your job is to answer employee questions. 
+You have access to tools: query_the_database. For any question about corporation's database, use the query_the_database tool. For any other question You may only answer questions about Yamaha motorbikes and related matters.
+ 
+### Database Schema:
+This is the database schema for the tool query_the_database:
 
 {SCHEMA}
 
@@ -176,15 +187,13 @@ END;
 
 				$initialChat = [
 					"role" => "system",
-					"content" => $systemRole
+					"content" => $systemRole,
 				];
 
 				// if this is a saved conversation - load previous chat
 				if ($this->ollama->sessionID == 'new') {
-					echo "NEW";
 					$content = $initialChat;
 				} else {
-					echo "NONEW";
 					$content = [];
 
 					$content[] = $initialChat;
@@ -194,15 +203,37 @@ END;
 					}
 				}
 
-				// print_r($content);
-				// exit;
+				// tambahkan pertanyaan baru
+				$content[] = [
+					"role" => "user",
+					"content" => $this->ollama->prompt
+				];
 
 				// preparing parameter to Ollama
 				$conversationChat = [
 					"model" => $this->ollama->llm,
 					"stream" => false,
 					"options" => [
-						"temperature" => 0
+						"temperature" => 0.5
+					],
+					"tools" => [
+						[
+							"type" => "function",
+							"function" => [
+								"name" => "query_the_database",
+								"description" => "Get needed data from MySQL database",
+								"parameters" => [
+									"type" => "object",
+									"properties" => [
+										"query" => [
+											"type" => "string",
+											"description" => "The query to run at database, e.g. SELECT a.* FROM users a LIMIT 10"
+										]
+									],
+									"required" => ["query"]
+								]
+							]
+						]
 					],
 					"messages" => $content
 				];
@@ -223,7 +254,10 @@ END;
 				$this->router->sendStream(message: $message);
 			}
 
-			// print_r($conversationChat);
+
+			echo "DATA:\n";
+			print_r($conversationChat);
+
 
 			// send to Ollama
 			$responseAI = $this->ollama->getResponOllama(
@@ -231,11 +265,18 @@ END;
 				chatData: $conversationChat
 			);
 
+			echo "\n\n\nRESPONSE:\n";
+			print_r($responseAI);
+
+
 			// report the response to front-end debuging
 			$this->debug(content: $responseAI);
 
 			// get only the SQL Query from the response
-			$sqlQuery = $this->extractSQLquery(responseOllama: $responseAI['content']);
+			$sqlQuery = $this->extractSQLquery(
+				responseOllama: $responseAI
+			);
+
 
 			// if not SQL Query found
 			if ( $sqlQuery == '' ) {
@@ -244,8 +285,12 @@ END;
 				continue;
 			}
 
+
 			// run the query
+			$this->debug(content: "Generated Query: " . $sqlQuery);
+
 			$resultQuery = $this->db->runQuery(query: $sqlQuery);
+
 
 			// added the message history
 			$conversationChat['messages'][] = [
@@ -257,8 +302,8 @@ END;
 			if ( $resultQuery['status'] == 'error') {
 				$errorResult = $resultQuery['message'];
 			} else {
-				if ( count( $resultQuery['data'] ) > 10 ) {
-					$respon = array_slice($resultQuery['data'], 0, 10);
+				if ( count( $resultQuery['data'] ) > self::MAX_QUERY_RESULT) {
+					$respon = array_slice($resultQuery['data'], 0, self::MAX_QUERY_RESULT);
 				} else {
 					$respon = $resultQuery['data'];
 				}
@@ -272,17 +317,32 @@ END;
 
 
 	private function extractSQLquery(
-		string $responseOllama
+		array $responseOllama
 	) :string {
+		if ( isset( $responseOllama['tool_calls'] ) &&
+			! empty( $responseOllama['tool_calls'])	
+		) {
+			foreach ($responseOllama['tool_calls'] as $tool) {
+				if ($tool['function']['name'] === 'query_the_database' &&
+				 	isset($tool['function']['arguments']['query'])
+				) {
+					// print_r($tool['function']['arguments']['query']);
+					$stringWithSQL = $tool['function']['arguments']['query'];
+
+					return $stringWithSQL;
+				}
+			}
+		}
+
+		$stringWithSQL = $responseOllama['content'];
+
 		$pattern = '/SELECT.*?;/is';
 
-		if (preg_match($pattern, $responseOllama, $matches)) {
+		if (preg_match($pattern, $stringWithSQL, $matches)) {
 			$sqlQuery = $matches[0];
 		} else {
 			return "";
 		}
-
-		$this->debug(content: "Generated Query: " . $sqlQuery);
 
 		return $sqlQuery;
 	}

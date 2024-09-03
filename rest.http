@@ -84,7 +84,7 @@ Accept: application/json
 }
 
 ### WEB SIMULATION DATABASE - new session
-POST http://localhost/php_ollama/app/Router.php?llm=0&topic=database&path=ollama%2Fprompt&sessionId=new&prompt=apa+produk+kita+yang+paling+laris? HTTP/1.1
+POST http://localhost/php_ollama/app/Router.php?llm=0&topic=database&path=ollama%2Fprompt&sessionId=new&prompt=apa+nama+5+produk+kita+yang+paling+banyak+diorder? HTTP/1.1
 Accept: text/event-stream
 
 ### WEB SIMULATION DATABASE - load session
