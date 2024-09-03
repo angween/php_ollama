@@ -11,7 +11,7 @@ defined('APP_NAME') or exit('No direct script access allowed');
 
 class OllamaDB
 {
-	private const MAX_LOOP = 3;
+	private const MAX_LOOP = 2;
 
 	private const SCHEMA_PATH = "schema/";
 
@@ -130,17 +130,22 @@ END;
 		$prompt = $this->ollama->prompt;
 
 		$content = <<<END
-Based on the following SQL Query result, answer the user question using natural language with the same language the user use.
+Berdasar dari SQL Query_Result di bawah ini, jawablah Pertanyaan berikut dengan bahasa Indonesia yang natural dan mudah dimengerti.
 
-Question: `$prompt`
+Pertanyaan: $prompt
 
-Query Result: `$jsonResult`
+Query_Result: $jsonResult
 END;
 
 		$conversationDB[] = [
 			"role" => "system",
 			"content" => $content,
 			"created" => time()
+		];
+
+		$conversationDB[] = [
+			"role" => "user",
+			"content" => $prompt
 		];
 
 		$chatData = $this->ollama->prepareChatData(
@@ -158,13 +163,13 @@ END;
 	private function getQueryFromOllama(
 		string $systemRole,
 		string $schema
-	){
+	) {
 		// message to Ollama if the query return error result
 		$errorResult = '';
 		$progress = '';
 		$conversationChat = []; 	// local varible for geting the right query 
 
-		for ($i = 0; $i <= self::MAX_LOOP; $i++) {
+		for ($i = 0; $i < self::MAX_LOOP; $i++) {
 			if ( $errorResult != '' ) {
 				$progress = "(#".($i+1).": Trying another query...)";
 
@@ -221,7 +226,11 @@ END;
 							"type" => "function",
 							"function" => [
 								"name" => "query_the_database",
-								"description" => "Get needed data from MySQL database",
+								"description" => "Get needed data from MySQL database. Always remember to:
+- **Use Table Aliases** to prevent ambiguity. For example, `SELECT table1.col1, table2.col1 FROM table1 JOIN table2 ON table1.id = table2.id`.
+- Take message chat history into account
+- When creating a ratio, always cast the numerator as float
+- Add limit in Query to 10 rows except if tells differently",
 								"parameters" => [
 									"type" => "object",
 									"properties" => [
@@ -255,18 +264,14 @@ END;
 			}
 
 
-			echo "DATA:\n";
-			print_r($conversationChat);
-
-
 			// send to Ollama
 			$responseAI = $this->ollama->getResponOllama(
 				url: $this->ollama::URL_CHAT,
 				chatData: $conversationChat
 			);
 
-			echo "\n\n\nRESPONSE:\n";
-			print_r($responseAI);
+			// echo "\n\n\nRESPONSE:\n";
+			// print_r($responseAI);
 
 
 			// report the response to front-end debuging
@@ -297,6 +302,7 @@ END;
 				'role' => 'assistant',
 				'content' => $responseAI['content']
 			];
+
 
 			// return respon
 			if ( $resultQuery['status'] == 'error') {

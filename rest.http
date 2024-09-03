@@ -84,7 +84,7 @@ Accept: application/json
 }
 
 ### WEB SIMULATION DATABASE - new session
-POST http://localhost/php_ollama/app/Router.php?llm=0&topic=database&path=ollama%2Fprompt&sessionId=new&prompt=apa+nama+5+produk+kita+yang+paling+banyak+diorder? HTTP/1.1
+POST http://localhost/php_ollama/app/Router.php?llm=0&topic=database&path=ollama%2Fprompt&sessionId=new&prompt=sebutkan+nama+5+produk+kita+yang+paling+banyak+diorder? HTTP/1.1
 Accept: text/event-stream
 
 ### WEB SIMULATION DATABASE - load session
@@ -123,6 +123,29 @@ Accept: application/json
     {
       "role": "user",
       "content": "apa nama 5 produk kita yang paling banyak di order?"
+    }
+  ]
+}
+
+### chat 
+POST http://localhost:11434/api/chat HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "model": "llama3.1",
+  "stream": false,
+  "options": {
+    "temperature": 1
+  },
+  "messages": [
+    {
+      "role": "system",
+      "content": "Berdasar dari SQL Query Result di bawah ini, jawablah pertanyaan dari Question user berikut dengan bahasa Indonesia yang natural dan mudah dimengerti.
+
+Question: `sebutkan nama 5 produk kita yang paling banyak diorder?`
+
+Query Result: `[{\"productCode\":\"S18_3232\",\"total_order\":53},{\"productCode\":\"S12_4473\",\"total_order\":28},{\"productCode\":\"S18_2581\",\"total_order\":28},{\"productCode\":\"S18_3856\",\"total_order\":28},{\"productCode\":\"S24_2022\",\"total_order\":28}]`"
     }
   ]
 }
