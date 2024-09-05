@@ -19,6 +19,8 @@ class OllamaDB
 
 	private ?Database $db = null;
 
+	private bool $toolCalled = false;
+
 	private const SYSTEM_CONTENT9 = <<<END
 ### Instructions:
 Your task is to convert a question into a SQL query, given a MySQL database schema.
@@ -90,6 +92,7 @@ END;
 
 		// if result is empty
 		if (empty($resultQuery)) {
+
 			if ($this->router->isStreaming) {
 				$content = "Maaf saya belum bisa menemukan jawabannya, silahkan dicoba lagi.";
 
@@ -111,6 +114,7 @@ END;
 			array_splice( $resultQuery, 0, $this->ollama::RESULT_MAX_ROWS);
 		}
 
+
 		// update progress
 		$message = json_encode([
 			'status' => 'working',
@@ -124,6 +128,26 @@ END;
 
 		// debug information
 		$this->debug(content: 'Result: ' . json_encode( $resultQuery) );
+
+
+		// if is tool_call
+		if ($this->toolCalled) {
+
+			$chatData = $this->ollama->prepareChatData(
+				llm: $this->ollama->llm,
+				conversationHistory: [
+					"role" => "tool",
+					"content" => $resultQuery,
+				],
+				temperature: $this->ollama::LLM_TEMPERATURE
+			);
+
+			$response = $this->ollama->getResponOllama(url: $this->ollama::URL_CHAT, chatData: $chatData);
+
+			echo "\nAFTER TOOL:\n";
+			print_r($response);
+			exit;
+		}
 
 		// response result in natural language
 		$jsonResult = json_encode($resultQuery);
@@ -329,6 +353,8 @@ END;
 		if ( isset( $responseOllama['tool_calls'] ) &&
 			! empty( $responseOllama['tool_calls'])	
 		) {
+			$this->toolCalled = true;
+
 			foreach ($responseOllama['tool_calls'] as $tool) {
 				if ($tool['function']['name'] === 'query_the_database' &&
 				 	isset($tool['function']['arguments']['query'])
