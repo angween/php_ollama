@@ -2,10 +2,13 @@
 @llama3 = "llama3.1:8b-instruct-q8_0"
 @llama3_1 = "llama3.1"
 
+
 ### list
 GET http://localhost:11434/api/tags HTTP/1.1
 Content-Type: application/json
 Accept: application/json
+
+
 
 
 ### generate
@@ -18,31 +21,44 @@ Accept: application/json
   "options": {
     "temperature": 0
   },
-  "prompt": "tell me a chicken joke",
+  "prompt": "apa saja pilihan motor matic Yamaha yang bagus",
   "stream": false
 }
 
-### generate
-POST http://localhost:11434/api/generate HTTP/1.1
-Content-Type: application/json
-Accept: application/json
 
-{
-  "model": "sqlcoder",
-  "options": {
-    "temperature": 0
-  },
-  "prompt": "You are interacting with a user who is asking a question about the company's database. Based on the question below, response it with MySQL Query only, no chit-chat only SQL.\n\nQuestion: How to show my customer's name?",
-  "stream": false
-}
 
-### chat dengan history
+
+
+### contoh chat 
 POST http://localhost:11434/api/chat HTTP/1.1
 Content-Type: application/json
 Accept: application/json
 
 {
-  "model": "sqlcoder",
+  "model": {{llama3_1}},
+  "stream": false,
+  "options": {
+    "temperature": 0
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "apa saja motor matic Yamaha yang bagus"
+    }
+  ]
+}
+
+
+
+
+
+### chat dengan fine-tuning
+POST http://localhost:11434/api/chat HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "model": {{llama3_1}},
   "stream": false,
   "options": {
     "temperature": 0
@@ -50,59 +66,56 @@ Accept: application/json
   "messages": [
     {
       "role": "system",
-      "content": "You are interacting with a user who is asking a question about the company's data. Based on the user question below, response it with MySQL Query only, no chit-chat only SQL."
+      "content": "Kamu adalah Sales Penjual Motor Yamaha Indonesia dari dealer Tjahaja Baru di kota Padang Provinsi Sumatera Barat, Indonesia. Bersikap ramah dan membantu konsumen untuk memilihkan motor merek Yamaha."
     },
     {
       "role": "user",
-      "content": "Tell me some of my customers name."
+      "content": "apa saja motor matic yang bagus?"
     }
   ]
 }
 
 
-### chat dengan history
+
+
+
+### chat dengan fine-tuning 2
 POST http://localhost:11434/api/chat HTTP/1.1
 Content-Type: application/json
 Accept: application/json
 
 {
-  "model": "llama3.1",
+  "model": {{llama3_1}},
   "stream": false,
   "options": {
-    "temperature": 1
+    "temperature": 0
   },
   "messages": [
     {
       "role": "system",
-      "content": "You are Mario from the Super Mario Bros. Answer the user question as Mario."
+      "content": "Kamu adalah Sales Penjual Motor Yamaha Indonesia dari dealer Tjahaja Baru di kota Padang Provinsi Sumatera Barat, Indonesia. Bersikap ramah dan membantu konsumen untuk memilihkan motor merek Yamaha, usahakan topik pembicaraan selalu tentang produk Yamaha terbaru dan hindari produk dan topik selain motor Yamaha. Dan harap tolak dengan sopan pembicaraan yang tidak ada hubungan dengan produk motor Yamaha."
     },
     {
       "role": "user",
-      "content": "do you have sibling?"
+      "content": "Siapa nama 5 presiden Indonesia?"
     }
   ]
 }
 
-### WEB SIMULATION DATABASE - new session
-POST http://localhost/php_ollama/app/Router.php?llm=0&topic=database&path=ollama%2Fprompt&sessionId=new&prompt=sebutkan+nama+5+produk+kita+yang+paling+banyak+diorder? HTTP/1.1
-Accept: text/event-stream
-
-### WEB SIMULATION DATABASE - load session
-POST http://localhost/php_ollama/app/Router.php?llm=0&topic=database&path=ollama%2Fprompt&sessionId=new&prompt=sebutkan+5+nama+produk+yang+ada HTTP/1.1
-Accept: text/event-stream
 
 ### WEB SIMULATION GENERAL CHAT - new session
 POST http://localhost/php_ollama/app/Router.php HTTP/1.1
 Content-Type: application/json
-Accept: application/json
+Accept: text/event-stream
 
 {
   "llm": 0,
-  "topic": "general",
+  "topic": "database",
   "path": "ollama/prompt",
-  "sessionId": "2407180601_66984d3a5c2a3",
-  "prompt": "sebutkan 5 nama produk"
+  "sessionId": "new",
+  "prompt": "motor apa saja yang ada ditawarkan?"
 }
+
 
 ### chat dengan history
 POST http://localhost:11434/api/chat HTTP/1.1
@@ -127,25 +140,71 @@ Accept: application/json
   ]
 }
 
-### chat 
-POST http://localhost:11434/api/chat HTTP/1.1
+
+### WEB SIMULATION DATABASE - new session
+POST http://localhost/php_ollama/app/Router.php?llm=0&topic=database&path=ollama%2Fprompt&sessionId=new&prompt=sebutkan+nama+5+produk+kita+yang+paling+banyak+diorder? HTTP/1.1
+Accept: text/event-stream
+
+
+
+
+
+### WEB SIMULATION DATABASE - load session
+POST http://localhost/php_ollama/app/Router.php?llm=0&topic=database&path=ollama%2Fprompt&sessionId=new&prompt=sebutkan+5+nama presiden+Indonesia HTTP/1.1
+Accept: text/event-stream
+
+
+
+
+
+### SERVER2 - Anything Authen
+GET http://localhost:3001/api/v1/auth HTTP/1.1
+Accept: application/json
+Authorization: Bearer NPBD8BJ-Z40433B-KECWS8N-APWZFJ4
+
+
+
+
+
+
+### Check workspace tjahajabaru
+GET http://localhost:3001/api/v1/workspaces HTTP/1.1
+Accept: application/json
+Authorization: Bearer NPBD8BJ-Z40433B-KECWS8N-APWZFJ4
+
+
+
+
+
+
+### Chat dengan workspace konsumen tjahajabaru
+POST http://localhost:3001/api/v1/workspace/konsumen/chat HTTP/1.1
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer NPBD8BJ-Z40433B-KECWS8N-APWZFJ4
 
 {
-  "model": "llama3.1",
-  "stream": false,
-  "options": {
-    "temperature": 1
-  },
-  "messages": [
-    {
-      "role": "system",
-      "content": "Berdasar dari SQL Query Result di bawah ini, jawablah pertanyaan dari Question user berikut dengan bahasa Indonesia yang natural dan mudah dimengerti.
-
-Question: `sebutkan nama 5 produk kita yang paling banyak diorder?`
-
-Query Result: `[{\"productCode\":\"S18_3232\",\"total_order\":53},{\"productCode\":\"S12_4473\",\"total_order\":28},{\"productCode\":\"S18_2581\",\"total_order\":28},{\"productCode\":\"S18_3856\",\"total_order\":28},{\"productCode\":\"S24_2022\",\"total_order\":28}]`"
-    }
-  ]
+  "message": "apa saja motor matic yang bagus",
+  "mode": "chat"
 }
+
+
+
+
+
+
+
+
+
+
+### Chat dengan workspace dataanalis tjahajabaru
+POST http://localhost:3001/api/v1/workspace/dataanalis/chat HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer NPBD8BJ-Z40433B-KECWS8N-APWZFJ4
+
+{
+  "message": "@agent apa nama 5 produk yang paling banyak terjual",
+  "mode": "chat"
+}
+
