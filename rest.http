@@ -43,7 +43,7 @@ Accept: application/json
   "messages": [
     {
       "role": "user",
-      "content": "apa saja motor matic Yamaha yang bagus"
+      "content": "bagaimana cara menggunakan vector database di MySQL?"
     }
   ]
 }
@@ -142,7 +142,7 @@ Accept: application/json
 
 
 ### WEB SIMULATION DATABASE - new session
-POST http://localhost/php_ollama/app/Router.php?llm=0&topic=database&path=ollama%2Fprompt&sessionId=new&prompt=sebutkan+nama+5+produk+kita+yang+paling+banyak+diorder? HTTP/1.1
+POST http://localhost/php_ollama/app/Router.php?llm=0&topic=database&path=ollama%2Fprompt&sessionId=new&prompt=apa+saja+pilihan+motor+matic+yang+ada? HTTP/1.1
 Accept: text/event-stream
 
 
@@ -154,7 +154,7 @@ POST http://localhost/php_ollama/app/Router.php?llm=0&topic=database&path=ollama
 Accept: text/event-stream
 
 
-
+data: {"status":"debug","content":"Generated Query: SELECT motor FROM motor WHERE tipe_transmission = 'matic' AND kenyamanan LIKE '%motor%' AND desain_tampilan LIKE '%desain%' LIMIT 10"}
 
 
 ### SERVER2 - Anything Authen
@@ -208,3 +208,14 @@ Authorization: Bearer NPBD8BJ-Z40433B-KECWS8N-APWZFJ4
   "mode": "chat"
 }
 
+
+
+#### Ollama embedding
+POST http://localhost:11434/api/embeddings HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "model": {{llama3}},
+  "prompt": "Llamas are members of the camelid family"
+}
